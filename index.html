@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>韻段離合指數統計工具</title>
+  <script src="rhyme-stat.js"></script>
+  <script src="index.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 1em;
+      min-width: 400px;
+    }
+
+    h1 {
+      margin: 0.3em 0 0.6em;
+    }
+
+    @media screen and (max-width: 480px) {
+      body {
+        padding: 1em 0.5em;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .grid-container {
+        column-gap: 0;
+      }
+
+      table {
+        font-size: 1em;
+      }
+    }
+
+    p,
+    ul,
+    li {
+      margin: 0.25em 0;
+    }
+
+    .inline-note {
+      font-size: 75%;
+      position: relative;
+      bottom: -0.1em;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-auto-flow: dense;
+    }
+
+    .grid-container>div>:first-child,
+    .grid-container>div>:first-child>:first-child,
+    .grid-container>div>:first-child>:first-child>:first-child {
+      margin-top: 0;
+    }
+
+    .grid-container>div>:last-child,
+    .grid-container>div>:last-child>:last-child,
+    .grid-container>div>:last-child>:last-child>:last-child,
+    .chi2>:last-child {
+      margin-bottom: 0;
+    }
+
+    .flex-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .grid-container,
+    .flex-container {
+      gap: 1em 2em;
+    }
+
+    .grid-container+*,
+    .flex-container+* {
+      margin-top: 1em;
+    }
+
+    .input {
+      height: fit-content;
+    }
+
+    .input>* {
+      margin-bottom: 0.75em;
+    }
+
+    textarea,
+    button {
+      font-size: 1em;
+    }
+
+    textarea {
+      width: calc(100% - 12px);
+      font-family: auto;
+      padding: 2px 5px;
+      border-width: 1px;
+      resize: vertical;
+    }
+
+    table,
+    th,
+    td {
+      border: 0 solid;
+    }
+
+    table {
+      margin-top: 0.25em;
+      border-spacing: 0;
+      border-width: 1px 0;
+      line-height: 1;
+      font-size: 1.125em;
+    }
+
+    .narrow1 table {
+      font-size: 1em;
+    }
+
+    th,
+    td {
+      text-align: left;
+      font-weight: normal;
+      width: 2.5em;
+      padding: 9px;
+      padding-right: 7px;
+    }
+
+    .narrow2 th,
+    .narrow2 td {
+      width: 2.2em;
+    }
+
+    .narrow2 th>:first-child,
+    .narrow2 td>:first-child {
+      margin-left: -0.15em;
+    }
+
+    .narrow2 th:nth-of-type(2),
+    .narrow2 td:nth-of-type(2) {
+      padding-left: 0px;
+      padding-right: 7px;
+    }
+
+    th {
+      padding-right: 0;
+    }
+
+    th:first-of-type,
+    td:first-of-type {
+      width: auto;
+    }
+
+    th:nth-of-type(2),
+    td:nth-of-type(2) {
+      padding-left: 2px;
+      padding-right: 9px;
+      width: auto;
+    }
+
+    th:nth-of-type(3),
+    td:nth-of-type(3) {
+      padding-left: 10px;
+    }
+
+    td .value {
+      margin-right: 0.05em;
+    }
+
+    td sup,
+    td sub {
+      display: inline-block;
+      width: 2em;
+      margin-right: -2em;
+      font-size: 0.667em;
+      vertical-align: baseline;
+      position: relative;
+      bottom: 0.667em;
+    }
+
+    td sub {
+      bottom: -0.333em;
+    }
+
+    th:nth-of-type(3),
+    td:nth-of-type(3),
+    #output:not(.combine) td.cell-diag+td {
+      border-left-width: 1px;
+      padding-left: 8px;
+    }
+
+    tr:nth-of-type(2) td,
+    #output:not(.combine) td.cell-diag {
+      border-top-width: 1px;
+      padding-top: 8px;
+    }
+
+    .cell-f,
+    .cell-nan {
+      background: #fee;
+    }
+
+    .cell-t,
+    #output.combine .cell-diag,
+    #output:not(.hide-half-bkgd) .cell-diag {
+      background: #eff;
+    }
+
+    .cell-f-star {
+      background: #fef;
+    }
+
+    .cell-t-star {
+      background: #eef;
+    }
+
+    h4 {
+      margin: 0 0 0.75em;
+    }
+
+    .legend:not(.bkgd) .title,
+    .legend .icon {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .legend.value .title {
+      width: 6.25em;
+    }
+
+    .legend.chi2 .title {
+      width: 4.25em;
+    }
+
+    .legends .legend .title {
+      font-weight: bold;
+    }
+
+    .legend.bkgd .icon {
+      width: 1em;
+      height: 1em;
+      line-height: 1;
+      vertical-align: bottom;
+      padding: 0.1em;
+      margin-left: 2em;
+      margin-right: 0.5em;
+      text-align: center;
+    }
+
+    .legend.bkgd .icon span {
+      font-size: 0.75em;
+      position: relative;
+      top: -0.125em;
+    }
+
+    .legend.chi2 {
+      padding: 0.5em;
+      border: solid 1px #ddd;
+    }
+
+    #instruction pre {
+      font-family: auto;
+      display: inline;
+    }
+
+    #output.combine .hide-if-combine,
+    #output:not(.combine) .show-if-combine,
+    #output.show-tf .hide-if-tf,
+    #output:not(.show-tf) .show-if-tf,
+    #output:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine {
+      display: none;
+    }
+
+  </style>
+  <script>window.onresize = arrangeOutput;</script>
+</head>
+
+<body>
+  <h1>韻段離合指數統計工具</h1>
+  <div class="grid-container" style="grid-template-columns: 400px;">
+    <div id="input" class="input">
+      <div>
+        <p>各韻段的韻腳所屬韻類：</p>
+        <textarea id="material" style="height: 12em;" placeholder="輸入各韻段的韻腳所屬韻類……"></textarea>
+      </div>
+      <div>
+        <p>要在結果中顯示的韻類（留空則顯示所有韻類）：</p>
+        <textarea id="rimeNames" style="height: 2.75em;" placeholder="輸入要在結果中顯示的韻類……"></textarea>
+      </div>
+      <div>
+        <p>韻類名中要縮小字號的字符：</p>
+        <textarea id="rimeNamesMini" style="height: 4.5em;" placeholder="輸入韻類名中要缩小字号的字符……">
+一二三四五六七八九十等 重紐纽鈕钮 1234567890 ABCD 開开合齊齐撮呼洪細细 內内外輕重純纯真假 幫帮非端知來来精莊庄章照見见影喻 脣唇齒齿舌牙喉 銳鋭锐鈍钝 平上去入陰</textarea>
+      </div>
+      <div>
+        <button type="button" onclick="gen(true);">生成離合指數表</button>
+      </div>
+      <div>
+        <input type="checkbox" id="show-tf-check" onclick="gen();">離合指數後添加「T、F」（兩韻通、兩韻分）<br />
+        <input type="checkbox" id="combine-check" onclick="gen();">合併押韻次數和離合指數<br />
+        <input type="checkbox" id="hide-half-bkgd-check" onclick="gen();">不合併時，對角線左下不顯示背景顏色<br />
+        <input type="checkbox" id="hide-zero-check" onclick="gen();">不合併時，押韻次數爲 0 則省略<br />
+      </div>
+    </div>
+    <div id="output" style="display: none;">
+      <div>
+        <div class="flex-container">
+          <div style="width: max-content;">
+            <table id="table"></table>
+          </div>
+          <div class="legend chi2" style="align-self: flex-end;">
+            <h4><i>χ</i>² 臨界值簡表</h4>
+            <p><span class="title"><i>p</i> 值</span><i>χ</i>² 臨界值</p>
+            <p><span class="title">0.1</span>4.605</p>
+            <p><span class="title">0.05</span>5.991</p>
+            <p><span class="title">0.025</span>7.378</p>
+            <p><span class="title">0.01</span>9.21</p>
+            <p><span class="title">0.005</span>10.597</p>
+            <p>（<i>p</i> 越小，標準越嚴）</p>
+          </div>
+        </div>
+        <div class="legends">
+          <h4>表格說明</h4>
+          <div class="legend value">
+            <p><span class="title">最左側：</span>該韻韻腳字次</p>
+            <p class="show-if-combine"><span class="title">表格內部：</span>離合指數</p>
+            <p class="hide-if-combine"><span class="title">對角線：</span>該韻自押次數<span
+                class="show-if-hide-zero-or-combine">（爲 0 則省略）</span></p>
+            <p><span class="hide-if-combine title">對角線左下：</span><span
+                class="show-if-combine title">上標數字：</span>兩韻互押次數<span class="show-if-hide-zero-or-combine">（爲 0
+                則省略）</span>
+            </p>
+            <p class="hide-if-combine"><span class="title">對角線右上：</span>離合指數</p>
+            <p><span class="title">下標數字：</span><i>χ</i>² 值</p>
+          </div>
+          <div class="legend bkgd">
+            <p class="title"><span class="show-if-tf">下標字母、</span>單元格背景、星號：</p>
+            <p><span class="cell-t icon"><span class="show-if-tf">T</span></span>兩韻通</p>
+            <p><span class="cell-t-star icon"><span class="show-if-tf">T</span><span>*</span></span>兩韻通，但如果標準定得更嚴則不通</p>
+            <p><span class="cell-f-star icon"><span class="show-if-tf">F</span><span>*</span></span>兩韻分，但如果標準定得更寬則通</p>
+            <p><span class="cell-f icon"><span class="show-if-tf">F</span></span>兩韻分</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="instruction" style="align-self: flex-end;">
+      <h4>使用說明</h4>
+      <p>前兩個文本框接受以下幾種格式的輸入：（「腳」代表韻腳字，「韻」代表韻類名）</p>
+      <ul>
+        <li>
+          <pre>腳(韻)腳(韻)腳(韻)</pre>
+        </li>
+        <li>
+          <pre>韻,韻,韻</pre>
+        </li>
+        <li>
+          <pre>韻&#9;韻&#9;韻</pre>
+        </li>
+        <li>
+          <pre>韻 韻 韻</pre>
+        </li>
+        <li>
+          <pre>韻韻韻</pre>
+        </li>
+      </ul>
+      <p>除最後一種格式外，韻類名可以是多個字符，但不能含有半角括號、半角逗號、製表符和空格</p>
+      <p style="margin-top: 0.75em;">本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a></p>
+    </div>
+  </div>
+  <script>new ResizeObserver(arrangeOutput).observe(document.getElementById('input'));</script>
+</body>
+
+</html>
