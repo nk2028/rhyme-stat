@@ -15,6 +15,14 @@ function calcIdx(count1, count2, count11, count12, count22) {
   return idx;
 }
 
+// 計算轍離合指數（rhyme group mixing index）
+function calcGroupIdx(count1, count2, count12, countTotal) {
+  // count1, count2: 字次
+  // count12: 韻次
+  // countTotal: 總字次
+  return count12 * (countTotal - 1) / (count1 * count2);
+}
+
 // 計算 χ² 值
 function calcChi2(o11, o12, o22) {
   // o：observed
@@ -32,7 +40,7 @@ function calcChi2(o11, o12, o22) {
   return chi2;
 }
 
-// 獲取檢驗結果
+// 獲取韻離合指數和檢驗結果
 function getResult(count1, count2, count11, count12, count22) {
   let idx = calcIdx(count1, count2, count11, count12, count22);
   let chi2 = calcChi2(count11, count12, count22);
@@ -50,4 +58,20 @@ function getResult(count1, count2, count11, count12, count22) {
     }
   }
   return [idx, chi2, idxResult, chi2TestResult];
+}
+
+// 獲取轍離合指數
+function getGroupResult(count1, count2, count12, countTotal) {
+  let idx = calcGroupIdx(count1, count2, count12, countTotal);
+  let idxResult = '';
+  if (idx >= 2) {
+    idxResult = 'T';
+  } else if (idx >= 1.5) {
+    idxResult = 'T*';
+  } else if (idx >= 1) {
+    idxResult = 'F*';
+  } else {
+    idxResult = 'F';
+  }
+  return [idx, null, idxResult, null];
 }

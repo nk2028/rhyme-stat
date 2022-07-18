@@ -81,11 +81,11 @@
       margin-top: 1em;
     }
 
-    .input {
+    #input {
       height: fit-content;
     }
 
-    .input>* {
+    #input>* {
       margin-bottom: 0.75em;
     }
 
@@ -100,6 +100,10 @@
       padding: 2px 5px;
       border-width: 1px;
       resize: vertical;
+    }
+
+    #options div {
+      height: 1.5em;
     }
 
     table,
@@ -209,8 +213,8 @@
     }
 
     .cell-t,
-    #output.combine .cell-diag,
-    #output:not(.hide-half-bkgd) .cell-diag {
+    #output.combine:not(.hide-all-bkgd) .cell-diag,
+    #output:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
       background: #eff;
     }
 
@@ -220,6 +224,10 @@
 
     .cell-t-star {
       background: #eef;
+    }
+
+    #output.hide-all-bkgd td {
+      background: none;
     }
 
     h4 {
@@ -271,11 +279,33 @@
       display: inline;
     }
 
+    #options.rhyme-group .hide-if-rhyme-group,
+    #options:not(.rhyme-group) .show-if-rhyme-group,
+    #output.rhyme-group .hide-if-rhyme-group,
+    #output:not(.rhyme-group) .show-if-rhyme-group,
     #output.combine .hide-if-combine,
     #output:not(.combine) .show-if-combine,
     #output.show-tf .hide-if-tf,
     #output:not(.show-tf) .show-if-tf,
-    #output:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine {
+    #output:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine,
+    #output.hide-all-bkgd .hide-if-hide-all-bkgd {
+      display: none;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none !important;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    input#rhyme-check:checked~.count-total-line {
+      display: none;
+    }
+
+    input#rhyme-group-check:checked~.show-tf-check-line {
       display: none;
     }
 
@@ -286,7 +316,7 @@
 <body>
   <h1>韻段離合指數統計工具</h1>
   <div class="grid-container" style="grid-template-columns: 400px;">
-    <div id="input" class="input">
+    <div id="input">
       <div>
         <p>各韻段的韻腳所屬韻類：</p>
         <textarea id="material" style="height: 12em;" placeholder="輸入各韻段的韻腳所屬韻類……"></textarea>
@@ -297,17 +327,37 @@
       </div>
       <div>
         <p>韻類名中要縮小字號的字符：</p>
-        <textarea id="rimeNamesMini" style="height: 4.5em;" placeholder="輸入韻類名中要缩小字号的字符……">
-一二三四五六七八九十等 1234567890 ABCD 開开合洪細细撮口呼 內内外輕重紐纽鈕钮類类 幫帮非端知來来精莊庄章日照見见影喻云以 脣唇齒齿舌牙喉 銳鋭锐鈍钝 平上去入仄陰</textarea>
+        <textarea id="rimeNamesMini" style="height: 4.5em;" placeholder="輸入韻類名中要缩小字号的字符……"></textarea>
       </div>
       <div>
-        <button type="button" onclick="gen(true);">生成離合指數表</button>
+        <button type="button" onclick="gen(true, true);">生成離合指數表</button><button type="button"
+          onclick="if (writeSampleData()) gen(true);" style="margin-left: 0.75em;">加載示例韻段資料</button>
       </div>
-      <div>
-        <input type="checkbox" id="show-tf-check" onclick="gen();">離合指數後添加「T、F」（兩韻通、兩韻分）<br />
-        <input type="checkbox" id="combine-check" onclick="gen();">合併押韻次數和離合指數<br />
-        <input type="checkbox" id="hide-half-bkgd-check" onclick="gen();">不合併時，對角線左下不顯示背景顏色<br />
-        <input type="checkbox" id="hide-zero-check" onclick="gen();">不合併時，押韻次數爲 0 則省略<br />
+      <div id="options">
+        <div>算法：<input type="radio" name="idx-type" id="rhyme-check" value="rhyme" checked="checked"
+            style="margin-left: 1px;" onclick="gen();"><label for="rhyme-check">韻離合指數</label> <input type="radio"
+            name="idx-type" id="rhyme-group-check" value="group" onclick="gen();"><label
+            for="rhyme-group-check">轍離合指數</label>
+        </div>
+        <div class="show-if-rhyme-group">所有韻部總字次：<input type="number" id="countTotal"
+            style="width: 4em; vertical-align: top;" oninput="gen();" onchange="gen(false, true);">
+        </div>
+        <div style="height: 0.5em;">
+        </div>
+        <div class="hide-if-rhyme-group"><input type="checkbox" id="show-tf-check" onclick="gen();"><label
+            for="show-tf-check">韻離合指數後添加「T、F」（兩韻通、兩韻分）</label>
+        </div>
+        <div><input type="checkbox" id="combine-check" onclick="gen();"><label for="combine-check">合併押韻次數和離合指數</label>
+        </div>
+        <div><input type="checkbox" id="hide-half-bkgd-check" onclick="gen();"><label
+            for="hide-half-bkgd-check">不合併時，隱藏對角線左下的背景顏色</label>
+        </div>
+        <div><input type="checkbox" id="hide-zero-check" onclick="gen();"><label for="hide-zero-check">不合併時，押韻次數爲 0
+            則省略</label>
+        </div>
+        <div><input type="checkbox" id="hide-all-bkgd-check" onclick="gen();"><label
+            for="hide-all-bkgd-check">隱藏所有背景顏色</label>
+        </div>
       </div>
     </div>
     <div id="output" style="display: none;">
@@ -316,7 +366,7 @@
           <div style="width: max-content;">
             <table id="table"></table>
           </div>
-          <div class="legend chi2" style="align-self: flex-end;">
+          <div class="legend chi2 hide-if-rhyme-group" style="align-self: flex-end;">
             <h4><i>χ</i>² 臨界值簡表</h4>
             <p><span class="title"><i>p</i> 值</span><i>χ</i>² 臨界值</p>
             <p><span class="title">0.1</span>4.605</p>
@@ -330,23 +380,36 @@
         <div class="legends">
           <h4>表格說明</h4>
           <div class="legend value">
-            <p><span class="title">最左側：</span>該韻韻腳字次</p>
-            <p class="show-if-combine"><span class="title">表格內部：</span>離合指數</p>
-            <p class="hide-if-combine"><span class="title">對角線：</span>該韻自押次數<span
-                class="show-if-hide-zero-or-combine">（爲 0 則省略）</span></p>
-            <p><span class="hide-if-combine title">對角線左下：</span><span
-                class="show-if-combine title">上標數字：</span>兩韻互押次數<span class="show-if-hide-zero-or-combine">（爲 0
+            <p><span class="title">最左側：</span>該<span class="hide-if-rhyme-group">韻</span><span
+                class="show-if-rhyme-group">轍</span>韻腳字次</p>
+            <p class="show-if-combine"><span class="title">表格內部：</span><span class="hide-if-rhyme-group">韻</span><span
+                class="show-if-rhyme-group">轍</span>離合指數</p>
+            <p class="hide-if-combine"><span class="title">對角線：</span>該<span class="hide-if-rhyme-group">韻</span><span
+                class="show-if-rhyme-group">轍</span>自押次數<span class="show-if-hide-zero-or-combine">（爲 0 則省略）</span></p>
+            <p><span class="hide-if-combine title">對角線左下：</span><span class="show-if-combine title">上標數字：</span>兩<span
+                class="hide-if-rhyme-group">韻</span><span class="show-if-rhyme-group">轍</span>互押次數<span
+                class="show-if-hide-zero-or-combine">（爲 0
                 則省略）</span>
             </p>
-            <p class="hide-if-combine"><span class="title">對角線右上：</span>離合指數</p>
-            <p><span class="title">下標數字：</span><i>χ</i>² 值</p>
+            <p class="hide-if-combine"><span class="title">對角線右上：</span><span class="hide-if-rhyme-group">韻</span><span
+                class="show-if-rhyme-group">轍</span>離合指數</p>
+            <p class="hide-if-rhyme-group"><span class="title">下標數字：</span><i>χ</i>² 值</p>
           </div>
-          <div class="legend bkgd">
-            <p class="title"><span class="show-if-tf">下標字母、</span>單元格背景、星號：</p>
-            <p><span class="cell-t icon"><span class="show-if-tf">T</span></span>兩韻通</p>
-            <p><span class="cell-t-star icon"><span class="show-if-tf">T</span><span>*</span></span>兩韻通，但如果標準定得更嚴則不通</p>
-            <p><span class="cell-f-star icon"><span class="show-if-tf">F</span><span>*</span></span>兩韻分，但如果標準定得更寬則通</p>
-            <p><span class="cell-f icon"><span class="show-if-tf">F</span></span>兩韻分</p>
+          <div class="legend bkgd hide-if-hide-all-bkgd">
+            <p class="title"><span class="show-if-tf hide-if-rhyme-group">下標字母、</span>單元格背景<span
+                class="hide-if-rhyme-group">、星號</span>：</p>
+            <p><span class="cell-t icon"><span class="show-if-tf hide-if-rhyme-group">T</span></span>兩<span
+                class="hide-if-rhyme-group">韻通</span><span class="show-if-rhyme-group">轍合（離合指數 ≥ 2）</span></p>
+            <p><span class="cell-t-star icon"><span class="show-if-tf hide-if-rhyme-group">T</span><span
+                  class="hide-if-rhyme-group">*</span></span>兩<span
+                class="hide-if-rhyme-group">韻通，但如果標準定得更嚴則不通</span><span class="show-if-rhyme-group">轍近（離合指數
+                1.5~2）</span></p>
+            <p><span class="cell-f-star icon"><span class="show-if-tf hide-if-rhyme-group">F</span><span
+                  class="hide-if-rhyme-group">*</span></span>兩<span
+                class="hide-if-rhyme-group">韻分，但如果標準定得更寬則通</span><span class="show-if-rhyme-group">轍近（離合指數 1~1.5）</span>
+            </p>
+            <p><span class="cell-f icon"><span class="show-if-tf hide-if-rhyme-group">F</span></span>兩<span
+                class="hide-if-rhyme-group">韻分</span><span class="show-if-rhyme-group">轍遠（離合指數 &lt; 1）</span></p>
           </div>
         </div>
       </div>
@@ -375,7 +438,11 @@
       <p style="margin-top: 0.75em;">本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a></p>
     </div>
   </div>
-  <script>new ResizeObserver(arrangeOutput).observe(document.getElementById('input'));</script>
+  <script>
+    new ResizeObserver(arrangeOutput).observe(document.getElementById('input'));
+    writeSampleData(true);
+    gen();
+  </script>
 </body>
 
 </html>
