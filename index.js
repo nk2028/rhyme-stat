@@ -44,9 +44,11 @@ function splitRimeNames(rimeNames) {
   //  韻\t韻\t韻
   //  韻 韻 韻
   //  韻韻韻
-  rimeNames = rimeNames.replace(/.\(|\)|,|\t/g, ' ');
+  rimeNames = [...rimeNames].map((e, i, arr) => i < arr.length - 1 && arr[i + 1] === '(' ? '' : e).join('');
+  rimeNames = rimeNames.replace(/[\(\),\t]/g, ' ');
   rimeNames = rimeNames.replace(/ +/g, ' ');
-  return rimeNames.trim().split(rimeNames.includes(' ') ? ' ' : '');
+  rimeNames = rimeNames.trim();
+  return rimeNames.includes(' ') ? rimeNames.split(' ') : [...rimeNames];
 }
 
 // 獲取排好序的兩韻
@@ -76,7 +78,7 @@ function getCellValue(content) {
 // 獲取內容是韻類名的單元格
 function getCellRimeName(content, rimeNamesMini = '', isTh = false) {
   if (!content) return getCell();
-  content = content.split('').map(e => { return rimeNamesMini.includes(e) ? `(${e})` : e; }).join('');
+  content = [...content].map(e => rimeNamesMini.includes(e) ? `(${e})` : e).join('');
   content = content.replace(/\)\(/g, '');
   content = content.replace(/\(/g, '<span class="inline-note">');
   content = content.replace(/\)/g, '</span>');
@@ -97,7 +99,7 @@ function gen(reloadData = false, needValidateCountTotal = false) {
       options.classList.add(key);
     }
     // 轉換爲駝峰式
-    checks[key.replace(/-./g, s => { return s[1].toUpperCase(); })] = checked;
+    checks[key.replace(/-./g, s => s[1].toUpperCase())] = checked;
   });
 
   if (needValidateCountTotal && checks.rhymeGroup) validateCountTotal();
@@ -146,7 +148,7 @@ function genTable(checks) {
       let cell = null;
       let [idx, chi2, idxResult, chi2TestResult] = checks.rhymeGroup ?
         getGroupResult(count1, count2, count12, countTotal) :
-        getResult(count1, count2, count11, count12, count22)
+        getResult(count1, count2, count11, count12, count22);
       let result = idxResult || chi2TestResult;
 
       if (count12 === 0 && (checks.combine || checks.hideZero)) {
