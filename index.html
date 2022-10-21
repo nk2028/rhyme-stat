@@ -7,6 +7,7 @@
   <title>韻段離合指數統計工具</title>
   <script src="rhyme-stat.js"></script>
   <script src="index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qieyun"></script>
   <style>
     body {
       margin: 0;
@@ -89,6 +90,14 @@
       margin-bottom: 0.75em;
     }
 
+    #input>*:nth-last-child(n+4) {
+      margin-bottom: 0.25em;
+    }
+
+    #input>*:last-child {
+      margin-bottom: 0;
+    }
+
     textarea,
     button {
       font-size: 1em;
@@ -102,8 +111,12 @@
       resize: vertical;
     }
 
-    #options div {
-      height: 1.5em;
+    #buttons button:not(:first-of-type) {
+      margin-left: 0.5em;
+    }
+
+    #options div:not(:last-child) {
+      margin-bottom: 0.2em;
     }
 
     table,
@@ -274,9 +287,13 @@
       border: solid 1px #ddd;
     }
 
-    #instruction pre {
-      font-family: auto;
-      display: inline;
+    #instruction p {
+      margin-top: 0.5em;
+    }
+
+    #instruction .indent {
+      margin-left: 3em;
+      text-indent: -2em;
     }
 
     #options.rhyme-group .hide-if-rhyme-group,
@@ -309,6 +326,17 @@
       display: none;
     }
 
+    code,
+    #deriver-code {
+      font-size: 1em;
+      font-family: Courier New, monospace;
+    }
+
+    code {
+      background: #eee;
+      padding: 0.15em;
+    }
+
   </style>
   <script>window.onresize = arrangeOutput;</script>
 </head>
@@ -318,24 +346,34 @@
   <div class="grid-container" style="grid-template-columns: 400px;">
     <div id="input">
       <div>
-        <p>各韻段的韻腳所屬韻類：</p>
-        <textarea id="material" style="height: 12em;" placeholder="輸入各韻段的韻腳所屬韻類……"></textarea>
+        <p>① 各韻段的韻腳（字後可括注韻類或音韻地位）：</p>
+        <textarea id="material" style="height: 6em;" placeholder="輸入各韻段的韻腳……"></textarea>
       </div>
       <div>
-        <p>要在結果中顯示的韻類（留空則顯示所有韻類）：</p>
-        <textarea id="rimeNames" style="height: 2.75em;" placeholder="輸入要在結果中顯示的韻類……"></textarea>
+        <p>② 韻腳中要跳過的字符（視作和換行等同）：</p>
+        <textarea id="delimiters" style="height: 1.5em;" placeholder="輸入韻腳中要跳過的字符……"></textarea>
       </div>
       <div>
-        <p>韻腳中要跳過的字符（視作和換行等同）：</p>
-        <textarea id="delimiters" style="height: 2.75em;" placeholder="輸入韻腳中要跳過的字符……"></textarea>
+        <p>③ 各韻腳所屬韻類或音韻地位（描述或編碼）：</p>
+        <textarea id="dictionary" style="height: 6em;" placeholder="輸入各韻腳所屬韻類或音韻地位……"></textarea>
       </div>
       <div>
-        <p>韻類名中要縮小字號的字符：</p>
-        <textarea id="rimeNamesMini" style="height: 4.5em;" placeholder="輸入韻類名中要縮小字號的字符……"></textarea>
+        <p>④ 由音韻地位推導韻類的代碼（留空則導出韻名）：</p>
+        <textarea id="deriver-code" style="height: 6em;" placeholder="輸入由音韻地位推導韻類的代碼……"></textarea>
       </div>
       <div>
+        <p>⑤ 要在結果中顯示的韻類（留空則顯示所有韻類）：</p>
+        <textarea id="rime-names" style="height: 1.5em;" placeholder="輸入要在結果中顯示的韻類……"
+          onblur="this.value=this.value.replace(/\t/g, ' ')"></textarea>
+      </div>
+      <div>
+        <p>⑥ 韻類名中要縮小字號的字符：</p>
+        <textarea id="rime-names-mini" style="height: 3.5em;" placeholder="輸入韻類名中要縮小字號的字符……"></textarea>
+      </div>
+      <div id="buttons" style="white-space: nowrap;">
         <button type="button" onclick="gen(true, true);">生成離合指數表</button><button type="button"
-          onclick="if (writeSampleData()) gen(true);" style="margin-left: 0.75em;">加載示例韻段資料</button>
+          onclick="if (writeSampleData()) gen(true);">加載示例</button><button type="button"
+          onclick="if (writeSampleData(false, true)) gen(true);">加載示例（不用③④）</button>
       </div>
       <div id="options">
         <div>算法：<input type="radio" name="idx-type" id="rhyme-check" value="rhyme" checked="checked"
@@ -346,7 +384,7 @@
         <div class="show-if-rhyme-group">所有韻部總字次：<input type="number" id="countTotal"
             style="width: 4em; vertical-align: top;" oninput="gen();" onchange="gen(false, true);">
         </div>
-        <div style="height: 0.5em;">
+        <div style="margin-bottom: 0.5em;">
         </div>
         <div class="hide-if-rhyme-group"><input type="checkbox" id="show-tf-check" onclick="gen();"><label
             for="show-tf-check">韻離合指數後添加「T、F」（兩韻通、兩韻分）</label>
@@ -418,28 +456,21 @@
         </div>
       </div>
     </div>
-    <div id="instruction" style="align-self: flex-end;">
+    <div id="instruction" style="align-self: flex-end; max-width: 800px;">
       <h4>使用說明</h4>
-      <p>前兩個文本框接受以下幾種格式的輸入：（「腳」代表韻腳字，「韻」代表韻類名）</p>
-      <ul>
-        <li>
-          <pre>腳(韻)腳(韻)腳(韻)</pre>
-        </li>
-        <li>
-          <pre>韻,韻,韻</pre>
-        </li>
-        <li>
-          <pre>韻&#9;韻&#9;韻</pre>
-        </li>
-        <li>
-          <pre>韻 韻 韻</pre>
-        </li>
-        <li>
-          <pre>韻韻韻</pre>
-        </li>
-      </ul>
-      <p>除最後一種格式外，韻類名可以是多個字符，但不能含有半角括號、半角逗號、製表符和空格</p>
-      <p style="margin-top: 0.75em;">本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a></p>
+      <p>文本框輸入格式：</p>
+      <p class="indent">①：每行是一個韻段。括注用全半角括號均可</p>
+      <p class="indent">③：每行是一個韻腳。韻腳字和標注（韻類或音韻地位）之間可以用空格、製表符、逗號分隔，也可以不分隔，還可以是韻腳字後括注讀音（同<a
+          href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>匯出的格式）</p>
+      <p class="indent">④：同<a href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式，代碼返回韻類名</p>
+      <p class="indent">⑤：韻類之間用空格分隔（輸入製表符會自動替換爲空格）</p>
+      <p>若標注已經是韻類名，則會自動跳過④的推導。標注音韻地位（描述或編碼）的格式應與 <a
+          href="https://nk2028.shn.hk/qieyun-js/classes/____.html">qieyun-js</a> 相同。</p>
+      <p>①中的標注優先於③中的標注。若有韻腳字①、③中都無標注，則在生成離合指數表時會報錯並輸出。將輸出的字在<a
+          href="https://nk2028.shn.hk/qieyun-autoderiver/">推導器</a>中用 <code>return 音韻地位.描述;</code> 推導，匯出的結果可直接加入③中。</p>
+      <p>實際上大多數字只需在③中標注，但對於韻母有多讀的多音字，應在①中指定讀音。當然，也可在①中爲所有字標注而不使用③④，此時③④可以留空。</p>
+      <p>本頁面不使用緩存，各文本框中輸入的資料請在本地妥善保存！</p>
+      <p>本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a>。示例材料來自沈約作品中所有押梗攝的韻段。</p>
     </div>
   </div>
   <script>
