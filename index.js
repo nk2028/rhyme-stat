@@ -9,7 +9,7 @@ function loadCountTotal() {
   countTotal = document.getElementById('countTotal').value;
 }
 
-// 從文本框中讀入數據
+// 從文本框中讀入資料
 function loadData() {
   rimeCounts = [];
   pairCounts = [];
@@ -17,9 +17,11 @@ function loadData() {
   rimesMini = '';
   let material = document.getElementById('material');
   let rimeNames = document.getElementById('rimeNames');
+  let delimiters = document.getElementById('delimiters');
   let rimeNamesMini = document.getElementById('rimeNamesMini');
   if (material.value) {
-    material.value.split('\n').forEach(line => {
+    let materialValue = material.value.replace(RegExp(`[${delimiters.value}]`, 'g'), '\n');
+    materialValue.split('\n').forEach(line => {
       line = splitRimeNames(line);
       let rime1 = line[0];
       line.slice(1).forEach(rime2 => {
@@ -246,28 +248,32 @@ function arrangeOutput() {
   }
 }
 
-// 加載示例數據
+// 加載示例資料
 function writeSampleData(rimeNamesMiniOnly = false) {
   const materialSample = '衡(庚二)横(庚二)亨(庚二)行(庚二)\n客(庚二)陌(庚二)\n泽(庚二)客(庚二)\n鳠(耕)頟(庚二)白(庚二)宅(庚二)\n形(青)灵(青)冥(青)龄(青)\n声(清)英(庚三)\n诚(清)明(庚三)牲(庚莊)缨(清)盈(清)声(清)并(清)\n声(清)精(清)英(庚三)\n英(庚三)清(清)平(庚三)\n城(清)鸣(庚三)\n盈(清)平(庚三)声(清)生(庚莊)成(清)\n岭(清)秉(庚三)景(庚三)永(庚三)聘(清)请(清)\n圣(清)命(庚三)\n碧(清)石(清)\n辟(清)籍(清)役(清)\n积(清)石(清)脊(清)\n适(清)尺(清)迹(清)石(清)\n嵉(青)星(青)平(庚三)形(青)经(青)成(清)垧(青)萦(清)青(青)\n明(庚三)成(清)灵(青)盈(清)声(清)情(清)\n茎(耕)莺(耕)惊(庚三)\n摘(耕)襞(清)射(清)隙(庚三)席(清)役(清)惜(清)';
   const rimeNamesSample = '青 清 庚莊 庚三 耕 庚二';
+  const delimitersSample = '□；‖';
   const rimeNamesMiniSample = '一二三四五六七八九十等 1234567890 ABCD 開开合洪細细撮口呼 內内外輕重紐纽鈕钮類类 幫帮非端知來来精莊庄章日照見见影喻云以 脣唇齒齿舌牙喉 銳鋭锐鈍钝 平上去入仄陰';
   const countTotalSample = 1000;
   let material = document.getElementById('material');
   let rimeNames = document.getElementById('rimeNames');
+  let delimiters = document.getElementById('delimiters');
   let rimeNamesMini = document.getElementById('rimeNamesMini');
   let countTotal = document.getElementById('countTotal');
 
   if (rimeNamesMiniOnly) {
+    delimiters.value = delimitersSample;
     rimeNamesMini.value = rimeNamesMiniSample;
     return false;
   }
   if (material.value
     || rimeNames.value
     || rimeNamesMini.value && rimeNamesMini.value !== rimeNamesMiniSample) {
-    if (!confirm('示例數據會覆蓋現有數據，確認加載？')) return false;
+    if (!confirm('示例資料會覆蓋現有資料，確認加載？')) return false;
   }
   material.value = materialSample;
   rimeNames.value = rimeNamesSample;
+  delimiters.value = delimitersSample;
   rimeNamesMini.value = rimeNamesMiniSample;
   countTotal.value = countTotalSample;
   return true;
