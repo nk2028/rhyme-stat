@@ -25,6 +25,18 @@ function loadData() {
   let deriverCode = getInput(3);
   rimeNames = getInput(4);
   rimeNamesMini = getInput(5);
+  // 是否直接輸入韻類名
+  const inputIsRimeName = ![...'()（）'].some(e => material.includes(e)) && !dictionary.trim();
+
+  // 若輸入的是音韻地位描述或編碼，則推導出韻部名拆分字頭和標注
+  // 否則默認其已經是韻部名，跳過推導
+  function derive(annotation) {
+    let 音韻地位;
+    try { 音韻地位 = Qieyun.音韻地位.from描述(annotation); } catch (_) {
+      try { 音韻地位 = Qieyun.音韻地位.from編碼(annotation); } catch (_) { }
+    }
+    return 音韻地位 ? eval('(_ => {' + (deriverCode || 'return 音韻地位.韻;') + '})()') : annotation;
+  }
 
   // 拆分字頭和標注
   function splitAnnotation(text, fillAndDeriveAnnotation = false) {
@@ -32,25 +44,23 @@ function loadData() {
     text = text.replace(/[ \t,，\(\)（）]/g, '');
     text = [...text];
     text = [text[0], text.slice(1).join('')];
-    if (fillAndDeriveAnnotation) {
-      text[1] = text[1] || dictionary[text[0]];
-      let 音韻地位;
-      try { 音韻地位 = Qieyun.音韻地位.from描述(text[1]); } catch (_) {
-        try { 音韻地位 = Qieyun.音韻地位.from編碼(text[1]); } catch (_) { }
-      }
-      // 若標注無法轉爲音韻地位，則默認其已經是韻部名，跳過推導
-      if (音韻地位) text[1] = eval('(_ => {' + (deriverCode || 'return 音韻地位.韻;') + '})()');
-    };
+    if (fillAndDeriveAnnotation) text[1] = derive(text[1] || dictionary[text[0]]);
     return text;
   }
+
   dictionary = Object.fromEntries(dictionary.split('\n').map(splitAnnotation));
 
   material = material.replace(RegExp(`[${delimiters}]`, 'g'), '\n').trim();
   material = material.split('\n').map(line => {
-    line = line.replace(/(.([\(（].*?[\)）])?)/g, '$1 ');
+    if (inputIsRimeName) {
+      line = line.replace(/[\t,，]/g, ' ');
+      if (!line.includes(' ')) line = [...line].join(' ');
+    } else {
+      line = line.replace(/(.([\(（].*?[\)）])?)/g, '$1 ');
+    }
     line = line.replace(/ +/g, ' ');
     line = line.trim();
-    return line.split(' ').map(e => splitAnnotation(e, true));
+    return line.split(' ').map(e => inputIsRimeName ? [null, derive(e)] : splitAnnotation(e, true));
   });
   material.forEach(line => {
     let e1 = line[0];
@@ -75,7 +85,7 @@ function materialToText() {
 function getUnannotated() {
   let unannotated = [];
   material.forEach(line => line.forEach(e => {
-    if (!e[1] && !unannotated.includes(e[0])) unannotated.push(e[0]);
+    if (e.length && !e[1] && !unannotated.includes(e[0])) unannotated.push(e[0]);
   }));
   return unannotated;
 }
