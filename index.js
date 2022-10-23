@@ -26,7 +26,9 @@ function loadData() {
   rimeNames = getInput(4);
   rimeNamesMini = getInput(5);
   // 是否直接輸入韻類名
-  const inputIsRimeName = ![...'()（）'].some(e => material.includes(e)) && !dictionary.trim();
+  const inputIsRimeName = ![...'()（）'].some(e => material.includes(e)) // 含括號則不是韻類名
+    && (new Set([...material])).size < 30 // 出現 30 字以上則不是韻類名
+    && !dictionary.trim(); // 字典非空則不是韻類名
 
   // 若輸入的是音韻地位描述或編碼，則推導出韻部名拆分字頭和標注
   // 否則默認其已經是韻部名，跳過推導
@@ -56,7 +58,7 @@ function loadData() {
       line = line.replace(/[\t,，]/g, ' ');
       if (!line.includes(' ')) line = [...line].join(' ');
     } else {
-      line = line.replace(/(.([\(（].*?[\)）])?)/g, '$1 ');
+      line = line.replace(/(.([\(（].*?[\)）])?)/ug, '$1 ');
     }
     line = line.replace(/ +/g, ' ');
     line = line.trim();
