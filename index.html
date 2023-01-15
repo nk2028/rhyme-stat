@@ -119,6 +119,10 @@
       margin-bottom: 0.2em;
     }
 
+    #copy-button {
+      margin-bottom: 1em;
+    }
+
     table,
     th,
     td {
@@ -305,7 +309,10 @@
     #output.show-tf .hide-if-tf,
     #output:not(.show-tf) .show-if-tf,
     #output:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine,
-    #output.hide-all-bkgd .hide-if-hide-all-bkgd {
+    #output.hide-all-bkgd .hide-if-hide-all-bkgd,
+    #output:not(.has-unannotated) .show-if-has-unannotated,
+    #output:not(.table-valid) .show-if-table-valid,
+    #output.input-invalid .hide-if-input-invalid {
       display: none;
     }
 
@@ -364,7 +371,7 @@
       <div>
         <p>⑤ 要在結果中顯示的韻類（留空則顯示所有韻類）：</p>
         <textarea id="rime-names" style="height: 1.5em;" placeholder="輸入要在結果中顯示的韻類……"
-          onblur="this.value=this.value.replace(/\t/g, ' ')"></textarea>
+          onblur="this.value=this.value.replace(/[\t\n ]+/g, ' ').trim()"></textarea>
       </div>
       <div>
         <p>⑥ 韻類名中要縮小字號的字符：</p>
@@ -406,9 +413,15 @@
       <div>
         <div class="flex-container">
           <div style="width: max-content;">
+            <div id="copy-button" class="hide-if-input-invalid">
+              <button type="button" onclick="copy();">
+                <span class="show-if-has-unannotated">將無標注的字匯出至剪貼簿</span>
+                <span class="show-if-table-valid">將韻譜<span class="inline-note">韻類已標注</span>匯出至剪貼簿</span>
+              </button>
+            </div>
             <table id="table"></table>
           </div>
-          <div class="legend chi2 hide-if-rhyme-group" style="align-self: flex-end;">
+          <div class="legend chi2 show-if-table-valid hide-if-rhyme-group" style="align-self: flex-end;">
             <h4><i>χ</i>² 臨界值簡表</h4>
             <p><span class="title"><i>p</i> 值</span><i>χ</i>² 臨界值</p>
             <p><span class="title">0.1</span>4.605</p>
@@ -419,7 +432,7 @@
             <p>（<i>p</i> 越小，標準越嚴）</p>
           </div>
         </div>
-        <div class="legends">
+        <div class="legends show-if-table-valid">
           <h4>表格說明</h4>
           <div class="legend value">
             <p><span class="title">最左側：</span>該<span class="hide-if-rhyme-group">韻</span><span

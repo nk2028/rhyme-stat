@@ -53,7 +53,7 @@ function loadData() {
     return text;
   }
 
-  dictionary = Object.fromEntries(dictionary.split('\n').map(splitAnnotation));
+  dictionary = Object.fromEntries(dictionary.split('\n').map(e => splitAnnotation(e)));
 
   material = material.replace(RegExp(`[${delimiters}]`, 'g'), '\n').trim();
   material = material.split('\n').map(line => {
@@ -81,7 +81,7 @@ function loadData() {
   rimeNames = rimeNames ? rimeNames.split(' ') : Object.keys(rimeCounts);
 }
 
-// 韻譜轉爲文字版（需自行在瀏覽器控制台調用）
+// 韻譜轉爲文字版
 function materialToText() {
   return material.map(line => line.map(e => e[0] + '(' + e[1] + ')').join('')).join('\n');
 }
@@ -159,6 +159,7 @@ function gen(reloadData = false, needValidateCountTotal = false) {
 // 生成離合指數表
 function genTable(checks) {
   // 重設表格
+  let output = document.getElementById('output');
   let table = document.getElementById('table');
   let message = '';
   if (!rimeNames.length) {
@@ -171,9 +172,11 @@ function genTable(checks) {
   }
   if (message) {
     table.innerHTML = '<tr><th style="line-height: 1.3;"><div style="color: red;">' + message + '</div></th></tr>';
+    output.classList.add(message.startsWith('請正確輸入') ? 'input-invalid' : 'has-unannotated');
     return;
   }
   table.innerHTML = '';
+  output.classList.add('table-valid');
 
   // 生成表格
   let headRow = document.createElement('tr');
@@ -269,11 +272,14 @@ function arrangeOutput() {
     return;
   }
 
+  let copyButton = document.getElementById('copy-button');
   let table = document.getElementById('table');
   [1, 2].forEach(i => { output.classList.remove('narrow' + i); });
   output.style.gridRow = '1 / span 3';
   output.style.gridColumn = '2';
   instruction.style.gridColumn = '1';
+  copyButton.style.marginBottom = '1.5em';
+  copyButton.style.marginTop = 'calc(0.25em - ' + copyButton.offsetHeight + 'px - 1.5em)';
   if (output.firstElementChild.offsetHeight < input.offsetHeight) {
     // output 不夠高則 instruction 佔滿兩列
     output.style.gridRow = '1';
@@ -283,6 +289,8 @@ function arrangeOutput() {
     // 窗口不夠寬則將 output 挪至 input 下方
     output.style.gridRow = '';
     output.style.gridColumn = '1 / span 2';
+    copyButton.style.marginBottom = '';
+    copyButton.style.marginTop = '';
     // 仍不夠寬則減小單元格寬度
     [1, 2].forEach(i => {
       if (table.offsetLeft + table.offsetWidth + 20 > document.body.offsetWidth) {
@@ -332,4 +340,27 @@ function validateCountTotal() {
   if (confirm(text + '\n\n已輸入韻段的總字次爲 ' + count + '，是否填入此值並計算？\n（這要求輸入的韻段爲所有韻部的韻段）')) {
     document.getElementById('countTotal').value = count;
   }
+}
+
+// 將韻譜或無標注的字匯出至剪貼簿
+function copy() {
+  const txt = getUnannotated().join('\n') || materialToText();
+  function copyFailed() { alert('瀏覽器不支援匯出至剪貼簿，操作失敗'); }
+  function copySuccess() { confirm('已成功匯出至剪貼簿'); }
+  function copyFallback() {
+    const textArea = document.createElement("textarea");
+    textArea.value = txt;
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy") ? copySuccess() : copyFailed();
+    } catch (err) {
+      copyFailed();
+    }
+    document.body.removeChild(textArea);
+  }
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(copySuccess, () => copyFallback(txt));
+  else copyFallback(txt);
 }
