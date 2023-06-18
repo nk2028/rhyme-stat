@@ -6,16 +6,17 @@ let rimeNames = [];
 let rimeNamesMini = '';
 const inputIds = ['material', 'delimiters', 'dictionary', 'deriver-code', 'rime-names', 'rime-names-mini'];
 
+function getInputElement(i) { return document.getElementById(inputIds[i]); }
 function getInput(i) { return document.getElementById(inputIds[i]).value; }
 function setInput(i, str) { document.getElementById(inputIds[i]).value = str; }
 
-// 讀入所有韻部總字次
+// 讀入所有韻類總字次
 function loadCountTotal() {
   countTotal = document.getElementById('countTotal').value;
 }
 
-// 從文本框中讀入資料，標注好各韻腳的韻部名，計算字次韻次
-function loadData() {
+// 從文本框中讀入資料，標注好各韻腳的韻類名，計算字次韻次
+function loadData(checks) {
   rimeCounts = [];
   pairCounts = [];
   if (!getInput(0)) return;
@@ -25,22 +26,23 @@ function loadData() {
   let deriverCode = getInput(3);
   rimeNames = getInput(4);
   rimeNamesMini = getInput(5);
-  // 是否直接輸入韻類名
-  const inputIsRimeName = !dictionary.trim() && ( // 字典須留空
-    // 含空格且在 50 字以內則認爲是韻類，50 字以上則認爲是誤帶空格的韻腳（也防止生成過大的表格）
-    material.includes(' ') && (new Set([...material])).size < 50 ||
-    // 無括號且在 30 字以內則認爲是韻類，30 字以上則認爲是仍未標注的韻腳
-    ![...'()（）'].some(e => material.includes(e)) && (new Set([...material])).size < 30
-  );
+  if (checks.phonoDesc) deriverCode = '_ => {' + (deriverCode || 'return 音韻地位.韻;') + '}';
+  if (checks.pinyin) deriverCode = '_ => {' + (deriverCode || 'return 漢語拼音.韻母;') + '}';
 
-  // 若輸入的是音韻地位描述或編碼，則推導出韻部名拆分字頭和標注
-  // 否則默認其已經是韻部名，跳過推導
+  // 若輸入的標注是音韻地位描述或編碼，則推導出韻名
+  // 若輸入的標注是拼音，則推導出韻母
+  // 否則認爲標注是自定韻類名，直接返回
   function derive(annotation) {
     let 音韻地位;
-    try { 音韻地位 = Qieyun.音韻地位.from描述(annotation); } catch (_) {
-      try { 音韻地位 = Qieyun.音韻地位.from編碼(annotation); } catch (_) { }
+    let 漢語拼音;
+    if (checks.phonoDesc) {
+      try { 音韻地位 = Qieyun.音韻地位.from描述(annotation); } catch (_) {
+        try { 音韻地位 = Qieyun.音韻地位.from編碼(annotation); } catch (_) { }
+      }
+    } else if (checks.pinyin) {
+      try { 漢語拼音 = from拼音(annotation); } catch (_) { }
     }
-    return 音韻地位 ? eval('(_ => {' + (deriverCode || 'return 音韻地位.韻;') + '})()') : annotation;
+    try { return eval(deriverCode)(annotation); } catch (_) { return annotation; }
   }
 
   // 拆分字頭和標注
@@ -54,10 +56,22 @@ function loadData() {
   }
 
   dictionary = Object.fromEntries(dictionary.split('\n').map(e => splitAnnotation(e)));
-
+  const isUnt = material.includes('绿去\n天连');
+  if (isUnt) {
+    // 僅用於 unt 韻譜
+    delimiters = delimiters.replace('□', '');
+    material = material.replace(/韵脚.*\n/, '');
+    setInput(1, delimiters);
+  }
   material = material.replace(RegExp(`[${delimiters}]`, 'g'), '\n').trim();
+  if (isUnt) [
+    [/\/\//ug, ''],
+    [/\{|</ug, '['], [/\}|>/ug, ']'],
+    [/\]\[/ug, ''], [/\[(.)\]/ug, '$1'],
+    [/(.)\[(.)/ug, '$1$2['], [/(.)\](.)/ug, ']$1$2'], [/\[.*?\]/ug, '\n'],
+  ].forEach(pair => { material = material.replace(pair[0], pair[1]); });
   material = material.split('\n').map(line => {
-    if (inputIsRimeName) {
+    if (checks.rimeNameOnly) {
       line = line.replace(/[\t,，]/g, ' ');
       if (!line.includes(' ')) line = [...line].join(' ');
     } else {
@@ -65,7 +79,7 @@ function loadData() {
     }
     line = line.replace(/ +/g, ' ');
     line = line.trim();
-    return line.split(' ').map(e => inputIsRimeName ? [null, derive(e)] : splitAnnotation(e, true));
+    return line.split(' ').map(e => checks.rimeNameOnly ? [null, derive(e)] : splitAnnotation(e, true));
   });
   material.forEach(line => {
     let e1 = line[0];
@@ -130,17 +144,19 @@ function getCellRimeName(content, isTh = false) {
 }
 
 function gen(reloadData = false, needValidateCountTotal = false) {
-  let checkKeys = ['rhyme-group', 'show-tf', 'combine', 'hide-half-bkgd', 'hide-zero', 'hide-all-bkgd'];
+  let checkKeys = [
+    'phono-desc', 'pinyin', 'rime-name-only',
+    'rhyme', 'rhyme-group',
+    'show-tf', 'combine', 'hide-half-bkgd', 'hide-zero', 'hide-all-bkgd',
+  ];
   let checks = [];
+  let main = document.getElementById('main');
   let output = document.getElementById('output');
-  let options = document.getElementById('options');
-  output.classList = '';
-  options.classList = '';
+  main.classList = '';
   checkKeys.forEach(key => {
     let checked = document.getElementById(key + '-check').checked;
     if (checked) {
-      output.classList.add(key);
-      options.classList.add(key);
+      main.classList.add(key);
     }
     // 轉換爲駝峰式
     checks[key.replace(/-./g, s => s[1].toUpperCase())] = checked;
@@ -149,9 +165,10 @@ function gen(reloadData = false, needValidateCountTotal = false) {
   if (needValidateCountTotal && checks.rhymeGroup) validateCountTotal();
   loadCountTotal();
   if (reloadData) {
-    loadData();
-    output.style.display = '';
+    loadData(checks);
+    output.style.display = getInput(0) ? '' : 'none';
   }
+  updatePlaceholders(checks);
   genTable(checks);
   arrangeOutput(true);
 }
@@ -159,11 +176,15 @@ function gen(reloadData = false, needValidateCountTotal = false) {
 // 生成離合指數表
 function genTable(checks) {
   // 重設表格
-  let output = document.getElementById('output');
+  let main = document.getElementById('main');
   let table = document.getElementById('table');
   let message = '';
   if (!rimeNames.length) {
     message = '請正確輸入韻段！';
+  } else if (rimeNames.length > 53) {
+    // 防止切換標注種類時，生成過大的表格
+    message = '請正確輸入韻段！<br>當前表格過大（共 ' + rimeNames.length + ' 韻類）';
+    // TODO: 增加按鈕，使強行顯示
   } else if (checks.rhymeGroup && countTotal < 2) {
     message = '請正確輸入總字次！';
   } else {
@@ -172,11 +193,11 @@ function genTable(checks) {
   }
   if (message) {
     table.innerHTML = '<tr><th style="line-height: 1.3;"><div style="color: red;">' + message + '</div></th></tr>';
-    output.classList.add(message.startsWith('請正確輸入') ? 'input-invalid' : 'has-unannotated');
+    main.classList.add(message.startsWith('請正確輸入') ? 'input-invalid' : 'has-unannotated');
     return;
   }
   table.innerHTML = '';
-  output.classList.add('table-valid');
+  main.classList.add('table-valid');
 
   // 生成表格
   let headRow = document.createElement('tr');
@@ -255,6 +276,15 @@ function genTable(checks) {
   });
 }
 
+function updatePlaceholders(checks) {
+  [
+    !checks.rimeNameOnly ? '輸入各韻段的韻腳……' : '輸入各韻段韻腳的所屬韻類……',
+    '輸入' + (!checks.rimeNameOnly ? '韻腳' : '韻類') + '中要跳過的字符……',
+    '輸入各韻腳所屬' + (checks.phonoDesc ? '音韻地位或韻類' : '漢語拼音或韻類') + '……',
+    '輸入由' + (checks.phonoDesc ? '音韻地位' : '漢語拼音') + '推導韻類的代碼……',
+  ].forEach((v, i) => getInputElement(i).placeholder = v);
+}
+
 // 根據窗口寬度調整佈局
 function arrangeOutput() {
   let input = document.getElementById('input');
@@ -328,6 +358,7 @@ function writeSampleData(rimeNamesMiniOnly = false, noDictionary = false) {
   }
   sample.forEach((e, i) => { setInput(i, e); });
   document.getElementById('countTotal').value = countTotalSample;
+  document.getElementById('phono-desc-check').checked = true;
   return true;
 }
 
@@ -337,7 +368,7 @@ function validateCountTotal() {
 
   let text = countTotal === '' ? '未輸入總字次！' : '總字次不合法！';
   let count = eval(Object.values(rimeCounts).join('+'));
-  if (confirm(text + '\n\n已輸入韻段的總字次爲 ' + count + '，是否填入此值並計算？\n（這要求輸入的韻段爲所有韻部的韻段）')) {
+  if (confirm(text + '\n\n已輸入韻段的總字次爲 ' + count + '，是否填入此值並計算？\n（這要求輸入的韻段爲所有韻類的韻段）')) {
     document.getElementById('countTotal').value = count;
   }
 }

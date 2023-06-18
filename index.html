@@ -7,6 +7,7 @@
   <title>韻段離合指數統計工具</title>
   <script src="rhyme-stat.js"></script>
   <script src="index.js"></script>
+  <script src="pinyin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qieyun"></script>
   <style>
     body {
@@ -28,7 +29,7 @@
         text-align: center;
       }
 
-      .grid-container {
+      #main {
         column-gap: 0;
       }
 
@@ -49,20 +50,20 @@
       bottom: -0.1em;
     }
 
-    .grid-container {
+    #main {
       display: grid;
       grid-auto-flow: dense;
     }
 
-    .grid-container>div>:first-child,
-    .grid-container>div>:first-child>:first-child,
-    .grid-container>div>:first-child>:first-child>:first-child {
+    #main>div>:first-child,
+    #main>div>:first-child>:first-child,
+    #main>div>:first-child>:first-child>:first-child {
       margin-top: 0;
     }
 
-    .grid-container>div>:last-child,
-    .grid-container>div>:last-child>:last-child,
-    .grid-container>div>:last-child>:last-child>:last-child,
+    #main>div>:last-child,
+    #main>div>:last-child>:last-child,
+    #main>div>:last-child>:last-child>:last-child,
     .chi2>:last-child {
       margin-bottom: 0;
     }
@@ -72,12 +73,12 @@
       flex-wrap: wrap;
     }
 
-    .grid-container,
+    #main,
     .flex-container {
       gap: 1em 2em;
     }
 
-    .grid-container+*,
+    #main+*,
     .flex-container+* {
       margin-top: 1em;
     }
@@ -213,13 +214,13 @@
 
     th:nth-of-type(3),
     td:nth-of-type(3),
-    #output:not(.combine) td.cell-diag+td {
+    #main:not(.combine) td.cell-diag+td {
       border-left-width: 1px;
       padding-left: 8px;
     }
 
     tr:nth-of-type(2) td,
-    #output:not(.combine) td.cell-diag {
+    #main:not(.combine) td.cell-diag {
       border-top-width: 1px;
       padding-top: 8px;
     }
@@ -230,8 +231,8 @@
     }
 
     .cell-t,
-    #output.combine:not(.hide-all-bkgd) .cell-diag,
-    #output:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
+    #main.combine:not(.hide-all-bkgd) .cell-diag,
+    #main:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
       background: #eff;
     }
 
@@ -243,7 +244,7 @@
       background: #eef;
     }
 
-    #output.hide-all-bkgd td {
+    #main.hide-all-bkgd td {
       background: none;
     }
 
@@ -300,20 +301,28 @@
       text-indent: -2em;
     }
 
-    #options.rhyme-group .hide-if-rhyme-group,
-    #options:not(.rhyme-group) .show-if-rhyme-group,
-    #output.rhyme-group .hide-if-rhyme-group,
-    #output:not(.rhyme-group) .show-if-rhyme-group,
-    #output.combine .hide-if-combine,
-    #output:not(.combine) .show-if-combine,
-    #output.show-tf .hide-if-tf,
-    #output:not(.show-tf) .show-if-tf,
-    #output:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine,
-    #output.hide-all-bkgd .hide-if-hide-all-bkgd,
-    #output:not(.has-unannotated) .show-if-has-unannotated,
-    #output:not(.table-valid) .show-if-table-valid,
-    #output.input-invalid .hide-if-input-invalid {
+    #main.phono-desc .hide-if-phono-desc,
+    #main:not(.phono-desc) .show-if-phono-desc,
+    #main.pinyin .hide-if-pinyin,
+    #main:not(.pinyin) .show-if-pinyin,
+    #main.rime-name-only .hide-if-rime-name-only,
+    #main:not(.rime-name-only) .show-if-rime-name-only,
+    #main.rhyme-group .hide-if-rhyme-group,
+    #main:not(.rhyme-group) .show-if-rhyme-group,
+    #main.combine .hide-if-combine,
+    #main:not(.combine) .show-if-combine,
+    #main.show-tf .hide-if-tf,
+    #main:not(.show-tf) .show-if-tf,
+    #main:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine,
+    #main.hide-all-bkgd .hide-if-hide-all-bkgd,
+    #main:not(.has-unannotated) .show-if-has-unannotated,
+    #main:not(.table-valid) .show-if-table-valid,
+    #main.input-invalid .hide-if-input-invalid {
       display: none;
+    }
+
+    #main.rime-name-only .empty-if-rime-name-only {
+      visibility: hidden;
     }
 
     input::-webkit-outer-spin-button,
@@ -342,6 +351,7 @@
     code {
       background: #eee;
       padding: 0.15em;
+      line-height: 1;
     }
 
   </style>
@@ -350,23 +360,27 @@
 
 <body>
   <h1>韻段離合指數統計工具</h1>
-  <div class="grid-container" style="grid-template-columns: 400px;">
+  <div id="main" class="grid-container" style="grid-template-columns: 400px;">
     <div id="input">
       <div>
-        <p>① 各韻段的韻腳（字後可括注韻類或音韻地位）：</p>
-        <textarea id="material" style="height: 6em;" placeholder="輸入各韻段的韻腳……"></textarea>
+        <p>① 各韻段的韻腳<span class="hide-if-rime-name-only">（字後可括注<span class="show-if-phono-desc">音韻地位</span><span
+              class="show-if-pinyin">漢語拼音</span>或韻類）</span><span class="show-if-rime-name-only">所屬韻類</span>：</p>
+        <textarea id="material" style="height: 4.5em;"></textarea>
       </div>
       <div>
-        <p>② 韻腳中要跳過的字符（視作和換行等同）：</p>
-        <textarea id="delimiters" style="height: 1.5em;" placeholder="輸入韻腳中要跳過的字符……"></textarea>
+        <p>② <span class="hide-if-rime-name-only">韻腳</span><span
+            class="show-if-rime-name-only">韻類</span>中要跳過的字符（視作和換行等同）：</p>
+        <textarea id="delimiters" style="height: 1.5em;"></textarea>
       </div>
-      <div>
-        <p>③ 各韻腳所屬韻類或音韻地位（描述或編碼）：</p>
-        <textarea id="dictionary" style="height: 6em;" placeholder="輸入各韻腳所屬韻類或音韻地位……"></textarea>
+      <div class="empty-if-rime-name-only">
+        <p>③ 各韻腳所屬<span class="show-if-phono-desc">音韻地位（描述或編碼）</span><span class="show-if-pinyin">漢語拼音</span>或韻類</span>：
+        </p>
+        <textarea id="dictionary" style="height: 4.5em;"></textarea>
       </div>
-      <div>
-        <p>④ 由音韻地位推導韻類的代碼（留空則導出韻名）：</p>
-        <textarea id="deriver-code" style="height: 6em;" placeholder="輸入由音韻地位推導韻類的代碼……"></textarea>
+      <div class="empty-if-rime-name-only">
+        <p>④ 由<span class="show-if-phono-desc">音韻地位</span><span class="show-if-pinyin">漢語拼音</span>推導韻類的代碼（留空則導出<span
+            class="show-if-phono-desc">韻名</span><span class="show-if-pinyin">韻母</span>）：</p>
+        <textarea id="deriver-code" style="height: 4.5em;"></textarea>
       </div>
       <div>
         <p>⑤ 要在結果中顯示的韻類（留空則顯示所有韻類）：</p>
@@ -383,12 +397,19 @@
           onclick="if (writeSampleData(false, true)) gen(true);">加載示例（不用③④）</button>
       </div>
       <div id="options">
-        <div>算法：<input type="radio" name="idx-type" id="rhyme-check" value="rhyme" checked="checked"
-            style="margin-left: 1px;" onclick="gen();"><label for="rhyme-check">韻離合指數</label> <input type="radio"
-            name="idx-type" id="rhyme-group-check" value="group" onclick="gen();"><label
-            for="rhyme-group-check">轍離合指數</label>
+        <div style="margin-bottom: 0.5em;">標注：<input type="radio" name="annotation-type" id="phono-desc-check"
+            checked="checked" style="margin-left: 1px;" onclick="gen(true, true);"><label
+            for="phono-desc-check">音韻地位</label>
+          <input type="radio" name="annotation-type" id="pinyin-check" onclick="gen(true, true);"><label
+            for="pinyin-check">漢語拼音</label>
+          <input type="radio" name="annotation-type" id="rime-name-only-check" onclick="gen(true, true);"><label
+            for="rime-name-only-check">僅韻類名</label>
         </div>
-        <div class="show-if-rhyme-group">所有韻部總字次：<input type="number" id="countTotal"
+        <div>算法：<input type="radio" name="idx-type" id="rhyme-check" checked="checked" style="margin-left: 1px;"
+            onclick="gen();"><label for="rhyme-check">韻離合指數</label> <input type="radio" name="idx-type"
+            id="rhyme-group-check" onclick="gen();"><label for="rhyme-group-check">轍離合指數</label>
+        </div>
+        <div class="show-if-rhyme-group">所有韻類總字次：<input type="number" id="countTotal"
             style="width: 4em; vertical-align: top;" oninput="gen();" onchange="gen(false, true);">
         </div>
         <div style="margin-bottom: 0.5em;">
@@ -472,19 +493,28 @@
     <div id="instruction" style="align-self: flex-end; max-width: 800px;">
       <h4>使用說明</h4>
       <p>文本框輸入格式：</p>
-      <p class="indent">①：每行是一個韻段。括注用全半角括號均可</p>
-      <p class="indent">③：每行是一個韻腳。韻腳字和標注（韻類或音韻地位）之間可以用空格、製表符或全半角逗號分隔，也可以不分隔，還可以是韻腳字後括注韻類或音韻地位（同<a
-          href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>匯出的格式）</p>
-      <p class="indent">④：同<a href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式，代碼返回韻類名</p>
+      <p class="indent">①：每行是一個韻段<span class="hide-if-rime-name-only">。括注用全半角括號均可</span><span
+          class="show-if-rime-name-only">，僅輸入韻類而不輸入韻腳。韻類之間可以用空格、製表符或全半角逗號分隔，韻類名皆爲單字時也可以不分隔。</span></p>
+      <p class="indent hide-if-rime-name-only">③：每行是一個韻腳。韻腳字和標注（<span class="show-if-phono-desc">音韻地位</span><span
+          class="show-if-pinyin">漢語拼音</span>或韻類）之間可以用空格、製表符或全半角逗號分隔，也可以不分隔，還可以是韻腳字後括注<span
+          class="show-if-phono-desc">音韻地位</span><span class="show-if-pinyin">漢語拼音</span>或韻類（<span
+          class="show-if-pinyin">如</span>同<a href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>匯出的格式）</p>
+      <p class="indent hide-if-rime-name-only">④：<span class="show-if-phono-desc">同<a
+            href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式</span><span
+          class="show-if-pinyin">外部傳入的參數爲 <code>漢語拼音</code>，內含 3
+          個屬性：<code>聲母</code>、<code>韻母</code>、<code>聲調</code></span>，代碼返回韻類名</p>
       <p class="indent">⑤：韻類之間用空格分隔（輸入製表符會自動替換爲空格）</p>
-      <p>若標注已經是韻類名，則會自動跳過④的推導。標注音韻地位（描述或編碼）的格式應與 <a
-          href="https://nk2028.shn.hk/qieyun-js/classes/____.html">qieyun-js</a> 相同。</p>
-      <p>①中的標注優先於③中的標注。若有韻腳字①、③中都無標注，則在生成離合指數表時會報錯並輸出。將輸出的字在<a
-          href="https://nk2028.shn.hk/qieyun-autoderiver/">推導器</a>中用 <code>return 音韻地位.描述;</code> 推導，匯出的結果可直接加入③中。</p>
-      <p>實際上大多數字只需在③中標注，但對於韻母有多讀的多音字，應在①中指定讀音。當然，也可在①中爲所有字標注而不使用③④，此時③④可以留空。</p>
-      <p>此外，①中也可以只輸入韻類（或音韻地位）而不輸入韻腳，此時③須留空。①的韻類（或音韻地位）之間可以用空格、製表符或全半角逗號分隔，韻類名皆爲單字時也可以不分隔。</p>
+      <p class="hide-if-rime-name-only">若標注已經是韻類名，則會自動跳過④的推導，如此可以直接指定一些字的韻類。<span
+          class="show-if-phono-desc">標注音韻地位（描述或編碼）的格式應與 <a
+            href="https://nk2028.shn.hk/qieyun-js/classes/____.html">qieyun-js</a> 相同。</span><span
+          class="show-if-pinyin">標注漢語拼音時，聲調可以用符號附加在字母上，也可以用數字寫在音節末尾。</span></p>
+      <p class="hide-if-rime-name-only">①中的標注優先於③中的標注。若有韻腳字①、③中都無標注，則在生成離合指數表時會報錯並輸出。<span
+          class="show-if-phono-desc">將輸出的字在<a href="https://nk2028.shn.hk/qieyun-autoderiver/">推導器</a>中用
+          <code>return 音韻地位.描述;</code>
+          推導，匯出的結果可直接加入③中。</span></p>
+      <p class="hide-if-rime-name-only">實際上大多數字只需在③中標注，但對於韻母有多讀的多音字，應在①中指定讀音。當然，也可在①中爲所有字標注而不使用③④，此時③④可以留空。</p>
       <p>本頁面不使用緩存，各文本框中輸入的資料請在本地妥善保存！</p>
-      <p>本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a>。示例材料來自沈約作品中所有押梗攝的韻段。</p>
+      <p>本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a>。示例材料來自沈約作品中所有押梗攝的韻段；示例材料僅適用於「標注：音韻地位」模式。</p>
     </div>
   </div>
   <script>
