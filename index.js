@@ -199,19 +199,38 @@ function genTable(checks) {
   table.innerHTML = '';
   main.classList.add('table-valid');
 
+  function addDummyClassesAndClearIfDummy(element, rime) {
+    addedClasses = {
+      '|': ['dummy', 'add-border'],
+      '|_': ['dummy', 'add-border', 'gray-border'],
+      '||': ['dummy', 'add-border', 'double-border'],
+    }[rime];
+    if (addedClasses) {
+      element.classList.add(...addedClasses);
+      element.innerHTML = '';
+    }
+  }
   // 生成表格
   let headRow = document.createElement('tr');
+  table.appendChild(headRow);
   headRow.appendChild(getCell('', true));
   headRow.appendChild(getCell('字次', true));
-  table.appendChild(headRow);
-
+  rimeNames.some((rime1, i) => {
+    if (rime1 === '\\') return true;
+    let cell = getCellRimeName(rime1, true);
+    addDummyClassesAndClearIfDummy(cell, rime1);
+    headRow.appendChild(cell);
+  });
   rimeNames.forEach((rime1, i) => {
-    headRow.appendChild(getCellRimeName(rime1, true));
+    if (rime1 === '\\') return;
     let count1 = rimeCounts[rime1] || 0;
     let row = document.createElement('tr');
+    addDummyClassesAndClearIfDummy(row, rime1);
+    table.appendChild(row);
     row.appendChild(getCellRimeName(rime1));
     row.appendChild(getCellValue(count1));
-    rimeNames.forEach((rime2, j) => {
+    rimeNames.some((rime2, j) => {
+      if (rime2 === '\\') return true;
       let count2 = rimeCounts[rime2] || 0;
       let count11 = pairCounts[getPair(rime1, rime1)] || 0;
       let count12 = pairCounts[getPair(rime1, rime2)] || 0;
@@ -270,9 +289,9 @@ function genTable(checks) {
       if (i === j) {
         cell.classList.add('cell-diag');
       }
+      addDummyClassesAndClearIfDummy(cell, rime2);
       row.appendChild(cell);
     });
-    table.appendChild(row);
   });
 }
 
@@ -340,7 +359,7 @@ function writeSampleData(rimeNamesMiniOnly = false, noDictionary = false) {
     '□；。◎‖',
     noDictionary ? '' : '衡(匣開二庚平)\n横(匣合二庚平)\n亨(曉開二庚平)\n客(溪開二庚入)\n陌(明二庚入)\n泽(澄開二庚入)\n鳠(匣合二耕入)\n頟(疑開二庚入)\n白(並二庚入)\n宅(澄開二庚入)\n形(匣開四青平)\n灵(來開四青平)\n冥(明四青平)\n龄(來開四青平)\n声(書開三清平)\n英(影開三庚平)\n诚(常開三清平)\n明(明三庚平)\n牲(生開三庚平)\n缨(影開三清平)\n盈(以開三清平)\n并(幫三清平)\n精(精開三清平)\n清(清開三清平)\n平(並三庚平)\n城(常開三清平)\n鸣(明三庚平)\n生(生開三庚平)\n成(常開三清平)\n岭(來開三清上)\n秉(幫三庚上)\n景(見開三庚上)\n永(云合三庚上)\n聘(滂三清去)\n请(清開三清上)\n圣(書開三清去)\n命(明三庚去)\n碧(幫三庚入)\n石(常開三清入)\n辟(幫三清入)\n籍(從開三清入)\n役(以合三清入)\n积(精開三清入)\n脊(精開三清入)\n适(書開三清入)\n尺(昌開三清入)\n迹(精開三清入)\n嵉(定開四青平)\n星(心開四青平)\n经(見開四青平)\n垧(見合四青平)\n萦(影合三清平)\n青(清開四青平)\n情(從開三清平)\n茎(匣開二耕平)\n莺(影開二耕平)\n惊(見開三庚平)\n摘(知開二耕入)\n襞(幫三清入)\n射(船開三清入)\n隙(溪開三庚入)\n席(邪開三清入)\n惜(心開三清入)',
     noDictionary ? '' : "return 音韻地位.判斷([\n  ['庚韻 莊組', '庚莊'],\n  ['庚韻', '庚' + 音韻地位.等],\n  ['', 音韻地位.韻], // 其餘韻母\n]);",
-    '青 清 庚莊 庚三 耕 庚二',
+    '青 清 庚莊 庚三 耕 |_ 庚二',
     '一二三四五六七八九十等 1234567890 ABCD 開开合洪細细撮口呼 內内外輕重紐纽鈕钮類类 幫帮非端知來来精莊庄章日照見见影喻云以 脣唇齒齿舌牙喉 銳鋭锐鈍钝 平上去入仄陰',
   ];
   const countTotalSample = 1000;
