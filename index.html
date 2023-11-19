@@ -17,7 +17,7 @@
     }
 
     h1 {
-      margin: 0.3em 0 0.6em;
+      margin: 0.2em 0 0.4em;
     }
 
     @media screen and (max-width: 480px) {
@@ -88,15 +88,15 @@
     }
 
     #input>* {
-      margin-bottom: 0.75em;
+      margin-bottom: 0.4em;
     }
 
-    #input>*:nth-last-child(n+4) {
-      margin-bottom: 0.25em;
+    #input>*:nth-last-child(n+3) {
+      line-height: 0;
     }
 
-    #input>*:last-child {
-      margin-bottom: 0;
+    #input>*:nth-last-child(n+3) p {
+      line-height: initial;
     }
 
     textarea,
@@ -131,7 +131,7 @@
     }
 
     table {
-      margin-top: 0.25em;
+      margin-top: 0.33333em;
       border-spacing: 0;
       border-width: 1px 0;
       line-height: 1;
@@ -140,6 +140,11 @@
 
     .narrow1 table {
       font-size: 1em;
+    }
+
+    table caption {
+      font-size: 1.33333em;
+      margin-bottom: 0.375em;
     }
 
     th,
@@ -383,6 +388,11 @@
   <h1>韻段離合指數統計工具</h1>
   <div id="main" class="grid-container" style="grid-template-columns: 400px;">
     <div id="input">
+      <div style="display: flex; justify-content: space-between;">
+        <p style="text-wrap: nowrap; margin: 0.05em -5em 0 0;">表格標題：</p>
+        <input type="text" id="caption-input" placeholder="輸入表格標題……"
+          style="width: calc(100% - 12px - 5em); height: 1.1em; font-size: 1em;">
+      </div>
       <div>
         <p>① 各韻段的韻腳<span class="hide-if-rime-name-only">（字後可括注<span class="show-if-phono-desc">音韻地位</span><span
               class="show-if-pinyin">漢語拼音</span>或韻類）</span><span class="show-if-rime-name-only">所屬韻類</span>：</p>
@@ -412,13 +422,13 @@
         <p>⑥ 韻類名中要縮小字號的字符：</p>
         <textarea id="rime-names-mini" style="height: 3.5em;" placeholder="輸入韻類名中要縮小字號的字符……"></textarea>
       </div>
-      <div id="buttons" style="white-space: nowrap;">
+      <div id="buttons" style="white-space: nowrap; margin: 0.7em 0 0.6em;">
         <button type="button" onclick="gen(true, true);">生成離合指數表</button><button type="button"
           onclick="if (writeSampleData()) gen(true);">加載示例</button><button type="button"
           onclick="if (writeSampleData(false, true)) gen(true);">加載示例（不用③④）</button>
       </div>
       <div id="options">
-        <div style="margin-bottom: 0.5em;">標注：<input type="radio" name="annotation-type" id="phono-desc-check"
+        <div style="margin-bottom: 0.3em;">標注：<input type="radio" name="annotation-type" id="phono-desc-check"
             checked="checked" style="margin-left: 1px;" onclick="gen(true, true);"><label
             for="phono-desc-check">音韻地位</label>
           <input type="radio" name="annotation-type" id="pinyin-check" onclick="gen(true, true);"><label
@@ -426,29 +436,31 @@
           <input type="radio" name="annotation-type" id="rime-name-only-check" onclick="gen(true, true);"><label
             for="rime-name-only-check">僅韻類名</label>
         </div>
-        <div>算法：<input type="radio" name="idx-type" id="rhyme-check" checked="checked" style="margin-left: 1px;"
-            onclick="gen();"><label for="rhyme-check">韻離合指數</label> <input type="radio" name="idx-type"
-            id="rhyme-group-check" onclick="gen();"><label for="rhyme-group-check">轍離合指數</label>
+        <div style="margin-bottom: 0.3em;">算法：<input type="radio" name="idx-type" id="rhyme-check" checked="checked"
+            style="margin-left: 1px;" onclick="gen();"><label for="rhyme-check">韻離合指數</label> <input type="radio"
+            name="idx-type" id="rhyme-group-check" onclick="gen();"><label for="rhyme-group-check">轍離合指數</label>
         </div>
         <div class="show-if-rhyme-group">所有韻類總字次：<input type="number" id="countTotal"
-            style="width: 4em; vertical-align: top;" oninput="gen();" onchange="gen(false, true);">
-        </div>
-        <div style="margin-bottom: 0.5em;">
+            style="width: 4em; margin: -1em 0;" oninput="gen();" onchange="gen(false, true);">
         </div>
         <div class="hide-if-rhyme-group"><input type="checkbox" id="show-tf-check" onclick="gen();"><label
             for="show-tf-check">韻離合指數後添加「T、F」（兩韻通、兩韻分）</label>
         </div>
+        <!--
         <div><input type="checkbox" id="combine-check" onclick="gen();"><label for="combine-check">合併押韻次數和離合指數</label>
         </div>
-        <div><input type="checkbox" id="hide-half-bkgd-check" onclick="gen();"><label
-            for="hide-half-bkgd-check">不合併時，隱藏對角線左下的背景顏色</label>
+        <div><input type="checkbox" id="hide-half-bkgd-check" onclick="gen();"><label for="hide-half-bkgd-check"><span
+          class="show-if-combine">不合併時，</span>隱藏對角線左下的背景顏色</label>
         </div>
-        <div><input type="checkbox" id="hide-zero-check" onclick="gen();" checked><label
-            for="hide-zero-check">不合併時，押韻次數爲 0
-            則省略</label>
+        -->
+        <div><input type="checkbox" id="hide-zero-check" onclick="gen();" checked><label for="hide-zero-check"><span
+              class="show-if-combine">不合併時，</span>押韻次數爲 0 則省略</label>
         </div>
         <div><input type="checkbox" id="hide-all-bkgd-check" onclick="gen();"><label
-            for="hide-all-bkgd-check">隱藏所有背景顏色</label>
+            for="hide-all-bkgd-check">隱藏<!--所有-->背景顏色</label>
+        </div>
+        <div><input type="checkbox" id="simplified-check" onclick="gen();"><label
+            for="simplified-check">表格使用簡體字體</label>
         </div>
       </div>
     </div>
@@ -497,7 +509,8 @@
             <p class="title"><span class="show-if-tf hide-if-rhyme-group">下標字母、</span>單元格背景<span
                 class="hide-if-rhyme-group">、星號</span>：</p>
             <p><span class="cell-t icon"><span class="show-if-tf hide-if-rhyme-group">T</span></span>兩<span
-                class="hide-if-rhyme-group">韻通</span><span class="show-if-rhyme-group">轍合（離合指數 ≥ 2）</span></p>
+                class="hide-if-rhyme-group">韻通（離合指數 ≥ 90 或離合指數 ≥ 50 且 <i>χ</i>² < 4.605）</span><span
+                    class="show-if-rhyme-group">轍合（離合指數 ≥ 2）</span></p>
             <p><span class="cell-t-star icon"><span class="show-if-tf hide-if-rhyme-group">T</span><span
                   class="hide-if-rhyme-group">*</span></span>兩<span
                 class="hide-if-rhyme-group">韻通，但如果標準定得更嚴則不通</span><span class="show-if-rhyme-group">轍近（離合指數
@@ -507,7 +520,8 @@
                 class="hide-if-rhyme-group">韻分，但如果標準定得更寬則通</span><span class="show-if-rhyme-group">轍近（離合指數 1~1.5）</span>
             </p>
             <p><span class="cell-f icon"><span class="show-if-tf hide-if-rhyme-group">F</span></span>兩<span
-                class="hide-if-rhyme-group">韻分</span><span class="show-if-rhyme-group">轍遠（離合指數 &lt; 1）</span></p>
+                class="hide-if-rhyme-group">韻分（離合指數 < 50 或離合指數 < 90 且 <i>χ</i>² > 10.597）</span><span
+                class="show-if-rhyme-group">轍遠（離合指數 &lt; 1）</span></p>
           </div>
         </div>
       </div>
@@ -525,8 +539,8 @@
             href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式</span><span
           class="show-if-pinyin">外部傳入的參數爲 <code>漢語拼音</code>，內含 3
           個屬性：<code>聲母</code>、<code>韻母</code>、<code>聲調</code></span>，代碼返回韻類名</p>
-      <p class="indent">⑤：韻類之間用空格分隔（輸入製表符會自動替換爲空格），也可輸入下列符號用於添加框線：<br>
-        <code>|</code> 黑色單線、<code>|_</code> 灰色單線、<code>||</code> 黑色雙線
+      <p class="indent">⑤：韻類之間用空格分隔（輸入製表符會自動替換爲空格），也可在韻類之間插入下列符號（兩側需有空格）以添加框線：<code>|</code> 黑色單線、<code>|_</code>
+        灰色單線、<code>||</code> 黑色雙線，或插入 <code>\</code> 以省略右側列（以表示例外押入的韻類）
       </p>
       <p class="hide-if-rime-name-only">若標注已經是韻類名，則會自動跳過④的推導，如此可以直接指定一些字的韻類。<span
           class="show-if-phono-desc">標注音韻地位（描述或編碼）的格式應與 <a
@@ -538,7 +552,7 @@
           推導，匯出的結果可直接加入③中。</span></p>
       <p class="hide-if-rime-name-only">實際上大多數字只需在③中標注，但對於韻母有多讀的多音字，應在①中指定讀音。當然，也可在①中爲所有字標注而不使用③④，此時③④可以留空。</p>
       <p>本頁面不使用緩存，各文本框中輸入的資料請在本地妥善保存！</p>
-      <p>本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a>。示例材料來自沈約作品中所有押梗攝的韻段；示例材料僅適用於「標注：音韻地位」模式。
+      <p>本頁面原始碼公開於 <a href="https://github.com/nk2028/rhyme-stat">GitHub</a>。示例材料僅適用於「標注：音韻地位」模式。
       </p>
     </div>
   </div>

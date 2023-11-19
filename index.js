@@ -154,12 +154,13 @@ function gen(reloadData = false, needValidateCountTotal = false) {
   let output = document.getElementById('output');
   main.classList = '';
   checkKeys.forEach(key => {
-    let checked = document.getElementById(key + '-check').checked;
-    if (checked) {
+    let control = document.getElementById(key + '-check');
+    if (!control) return;
+    if (control.checked) {
       main.classList.add(key);
     }
     // 轉換爲駝峰式
-    checks[key.replace(/-./g, s => s[1].toUpperCase())] = checked;
+    checks[key.replace(/-./g, s => s[1].toUpperCase())] = control.checked;
   });
 
   if (needValidateCountTotal && checks.rhymeGroup) validateCountTotal();
@@ -197,7 +198,11 @@ function genTable(checks) {
     return;
   }
   table.innerHTML = '';
+  table.lang = document.getElementById('simplified-check').checked ? 'zh-CN' : 'zh-HK';
   main.classList.add('table-valid');
+  let caption = document.createElement('caption');
+  caption.innerHTML = document.getElementById('caption-input').value;
+  table.appendChild(caption);
 
   function addDummyClassesAndClearIfDummy(element, rime) {
     addedClasses = {
@@ -225,8 +230,6 @@ function genTable(checks) {
     if (rime1 === '\\') return;
     let count1 = rimeCounts[rime1] || 0;
     let row = document.createElement('tr');
-    addDummyClassesAndClearIfDummy(row, rime1);
-    table.appendChild(row);
     row.appendChild(getCellRimeName(rime1));
     row.appendChild(getCellValue(count1));
     rimeNames.some((rime2, j) => {
@@ -292,6 +295,8 @@ function genTable(checks) {
       addDummyClassesAndClearIfDummy(cell, rime2);
       row.appendChild(cell);
     });
+    addDummyClassesAndClearIfDummy(row, rime1);
+    table.appendChild(row);
   });
 }
 
@@ -378,6 +383,7 @@ function writeSampleData(rimeNamesMiniOnly = false, noDictionary = false) {
   sample.forEach((e, i) => { setInput(i, e); });
   document.getElementById('countTotal').value = countTotalSample;
   document.getElementById('phono-desc-check').checked = true;
+  document.getElementById('caption-input').value = '沈約梗攝用韻';
   return true;
 }
 
