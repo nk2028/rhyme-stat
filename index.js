@@ -436,10 +436,12 @@ function writeSampleData(writeDefaultSampleOnly = false, noDictionary = false) {
       },
     }[document.querySelector('input[name="annotation-type"]:checked').id]),
   };
-  if (Object.keys(sample).every(key => inputs[key].value && (
+  const okToWriteSample = Object.keys(sample).every(key =>
+    inputs[key].value === '' ||
     inputs[key].value === sample[key] ||
     inputs[key].value === defaultSample[key]
-  )) && !confirm('示例資料會覆蓋現有資料，確認加載？')) return false;
+  );
+  if (!okToWriteSample && !confirm('示例資料會覆蓋現有資料，確認加載？')) return false;
   Object.keys(sample).forEach(key => { inputs[key].value = sample[key]; });
   if (!writeDefaultSampleOnly) {
     document.getElementById('countTotal').value = 1000;
