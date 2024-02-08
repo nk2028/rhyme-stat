@@ -243,7 +243,7 @@ function genTable(checks) {
   main.classList.add('table-valid');
   let caption = document.createElement('caption');
   caption.innerHTML = document.getElementById('caption-input').value;
-  table.appendChild(caption);
+  if (caption.innerHTML) table.appendChild(caption);
 
   function addDummyClassesAndClearIfDummy(element, rime) {
     addedClasses = {
@@ -366,7 +366,7 @@ function arrangeOutput() {
     return;
   }
 
-  let copyButton = document.getElementById('copy-button');
+  let copyButton = document.getElementById('copy-buttons');
   let table = document.getElementById('table');
   [1, 2].forEach(i => { output.classList.remove('narrow' + i); });
   output.style.gridRow = '1 / span 3';
