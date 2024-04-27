@@ -117,9 +117,9 @@ function loadData(checks) {
     let e1 = line[0];
     line.slice(1).forEach(e2 => {
       let pair = getPair(e1[1], e2[1]);
-      rimeCounts[e1[1]] = (rimeCounts[e1[1]] || 0) + 1;
-      rimeCounts[e2[1]] = (rimeCounts[e2[1]] || 0) + 1;
-      pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+      rimeCounts[e1[1]] = (typeof rimeCounts[e1[1]] === 'number' && rimeCounts[e1[1]] || 0) + 1;
+      rimeCounts[e2[1]] = (typeof rimeCounts[e2[1]] === 'number' && rimeCounts[e2[1]] || 0) + 1;
+      pairCounts[pair] = (typeof pairCounts[pair] === 'number' && pairCounts[pair] || 0) + 1;
       e1 = e2;
     });
   });
