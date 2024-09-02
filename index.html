@@ -8,7 +8,7 @@
   <script src="rhyme-stat.js"></script>
   <script src="index.js"></script>
   <script src="pinyin.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qieyun"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tshet-uinh"></script>
   <style>
     body {
       margin: 0;
@@ -568,20 +568,19 @@
           class="show-if-phono-desc">音韻地位</span><span
           class="show-if-pinyin">漢語拼音</span>或韻類）之間可以用空格、製表符或全半角逗號分隔，也可以不分隔，還可以是韻腳字後括注<span
           class="show-if-phono-desc">音韻地位</span><span class="show-if-pinyin">漢語拼音</span>或韻類（<span
-          class="show-if-pinyin">如</span>同<a href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>匯出的格式）</p>
+          class="show-if-pinyin">如</span>同<a href="https://nk2028.shn.hk/tshet-uinh-autoderiver/">切韻音系自動推導器</a>匯出的格式）</p>
       <p class="indent hide-if-rime-name-only hide-if-rime-count-only">④：<span class="show-if-phono-desc">同<a
-            href="https://nk2028.shn.hk/qieyun-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式</span><span
+            href="https://nk2028.shn.hk/tshet-uinh-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式</span><span
           class="show-if-pinyin">外部傳入的參數爲 <code>漢語拼音</code>，內含 3
           個屬性：<code>聲母</code>、<code>韻母</code>、<code>聲調</code></span>，代碼返回韻類名</p>
       <p class="indent">⑤：韻類之間用空格分隔（輸入製表符會自動替換爲空格），也可在韻類之間插入下列符號（兩側需有空格）以添加框線：<code>|</code> 黑色單線、<code>|_</code>
         灰色單線、<code>||</code> 黑色雙線，或插入 <code>\</code> 以省略右側列（當右側爲例外押入的韻類時可以使用）
       </p>
       <p class="hide-if-rime-name-only hide-if-rime-count-only">若標注已經是韻類名，則會自動跳過④的推導，如此可以直接指定一些字的韻類。<span
-          class="show-if-phono-desc">標注音韻地位（描述或編碼）的格式應與 <a
-            href="https://nk2028.shn.hk/qieyun-js/classes/____.html">qieyun-js</a> 相同。</span><span
-          class="show-if-pinyin">標注漢語拼音時，聲調可以用符號附加在字母上，也可以用數字寫在音節末尾。</span></p>
+          class="show-if-phono-desc">標注音韻地位（描述或編碼）的格式應與 <a href="https://nk2028.shn.hk/tshet-uinh-js/">TshetUinh.js</a>
+          相同。</span><span class="show-if-pinyin">標注漢語拼音時，聲調可以用符號附加在字母上，也可以用數字寫在音節末尾。</span></p>
       <p class="hide-if-rime-name-only hide-if-rime-count-only">①中的標注優先於③中的標注。若有韻腳字①、③中都無標注，則在生成離合指數表時會報錯並輸出。<span
-          class="show-if-phono-desc">將輸出的字在<a href="https://nk2028.shn.hk/qieyun-autoderiver/">推導器</a>中用
+          class="show-if-phono-desc">將輸出的字在<a href="https://nk2028.shn.hk/tshet-uinh-autoderiver/">推導器</a>中用
           <code>return 音韻地位.描述;</code>
           推導，匯出的結果可直接加入③中。</span></p>
       <p class="hide-if-rime-name-only hide-if-rime-count-only">
