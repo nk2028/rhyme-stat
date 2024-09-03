@@ -382,14 +382,13 @@ function arrangeOutput() {
     return;
   }
 
-  let copyButton = document.getElementById('copy-buttons');
+  let copyButtons = document.getElementById('copy-buttons');
   let table = document.getElementById('table');
   [1, 2].forEach(i => { output.classList.remove('narrow' + i); });
   output.style.gridRow = '1 / span 3';
   output.style.gridColumn = '2';
   instruction.style.gridColumn = '1';
-  copyButton.style.marginBottom = '1.5em';
-  copyButton.style.marginTop = 'calc(0.25em - ' + copyButton.offsetHeight + 'px - 1.5em)';
+  copyButtons.classList.add('absolute');
   if (output.firstElementChild.offsetHeight < input.offsetHeight) {
     // output 不夠高則 instruction 佔滿兩列
     output.style.gridRow = '1';
@@ -399,8 +398,7 @@ function arrangeOutput() {
     // 窗口不夠寬則將 output 挪至 input 下方
     output.style.gridRow = '';
     output.style.gridColumn = '1 / span 2';
-    copyButton.style.marginBottom = '';
-    copyButton.style.marginTop = '';
+    copyButtons.classList.remove('absolute');
     // 仍不夠寬則減小單元格寬度
     [1, 2].forEach(i => {
       if (table.offsetLeft + table.offsetWidth + 20 > document.body.offsetWidth) {
@@ -418,7 +416,7 @@ function writeSampleData(writeDefaultSampleOnly = false, noDictionary = false) {
     delimiters: '□；。◎‖',
     dictionary: '',
     deriverCode: '',
-    rimeNamesMini: '一二三四五六七八九十等 1234567890 ABCD 開开合洪細细撮口呼 內内外輕重紐纽鈕钮類类 幫帮非端知來来精莊庄章日照見见影喻云以 脣唇齒齿舌牙喉 銳鋭锐鈍钝 平上去入仄陰',
+    rimeNamesMini: '一二三四五六七八九十等 1234567890 ABCD 開开合洪細细撮口呼 內内外輕轻重紐纽鈕钮類类 幫帮非端知來来精莊庄章日照見见影喻云以 脣唇齒齿舌牙喉 銳鋭锐鈍钝 平上去入仄陰',
   };
   const sample = {
     ...defaultSample,

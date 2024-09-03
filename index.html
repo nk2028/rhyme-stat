@@ -138,6 +138,11 @@
       white-space: nowrap;
     }
 
+    #copy-buttons.absolute {
+      position: absolute;
+      margin-top: -3em;
+    }
+
     #copy-buttons>:not(:last-child) {
       margin-right: 0.5em;
     }
@@ -518,7 +523,7 @@
       <div>
         <div class="flex-container">
           <div style="width: max-content;">
-            <div id="copy-buttons" class="hide-if-input-invalid">
+            <div id="copy-buttons" class="hide-if-input-invalid hide-if-rime-count-only">
               <button type="button" class="show-if-has-unannotated" onclick="copy(true);">複製無標注的字</button><button
                 type="button" class="show-if-table-valid" onclick="copy();">複製韻譜<span
                   class="inline-note">韻腳+韻類</span></button><button type="button" class="show-if-table-valid"
