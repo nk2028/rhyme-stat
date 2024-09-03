@@ -193,7 +193,7 @@ function gen(reloadData = false, needValidateCountTotal = false, needfixCount = 
   let main = document.getElementById('main');
   let output = document.getElementById('output');
   document.getElementById('grad-bkgd-check').disabled = document.getElementById('hide-all-bkgd-check').checked;
-  document.getElementById('skip-test-check').disabled = document.getElementById('hide-all-bkgd-check').checked;
+  document.getElementById('skip-test-check').disabled = document.getElementById('hide-all-bkgd-check').checked || !document.getElementById('grad-bkgd-check').checked;
   document.getElementById('show-tf-check').disabled = !document.getElementById('grad-bkgd-check').disabled && document.getElementById('grad-bkgd-check').checked;
   main.classList = '';
   checkKeys.forEach(key => {
