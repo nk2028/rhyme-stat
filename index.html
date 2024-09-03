@@ -125,6 +125,10 @@
       margin-left: 0.5em;
     }
 
+    :disabled+label {
+      color: silver;
+    }
+
     #options div:not(:last-child) {
       margin-bottom: 0.2em;
     }
@@ -268,9 +272,13 @@
     }
 
     .cell-t,
-    #main.combine:not(.hide-all-bkgd) .cell-diag,
-    #main:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
+    #main.combine:not(.grad-bkgd):not(.hide-all-bkgd) .cell-diag,
+    #main:not(.grad-bkgd):not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
       background: #eff;
+    }
+
+    #main.grad-bkgd .cell-diag {
+      background: #e6ffff;
     }
 
     .cell-f,
@@ -300,7 +308,7 @@
       white-space: nowrap;
     }
 
-    .legend .icon+* {
+    .legend .icon~* {
       line-height: 1;
     }
 
@@ -361,11 +369,19 @@
     #main:not(.combine) .show-if-combine,
     #main.show-tf .hide-if-tf,
     #main:not(.show-tf) .show-if-tf,
+    #main.grad-bkgd .hide-if-grad-bkgd,
+    #main:not(.grad-bkgd) .show-if-grad-bkgd,
+    #main.skip-test .hide-if-skip-test,
+    #main:not(.skip-test) .show-if-skip-test,
     #main:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine,
     #main.hide-all-bkgd .hide-if-hide-all-bkgd,
     #main:not(.has-unannotated) .show-if-has-unannotated,
     #main:not(.table-valid) .show-if-table-valid,
     #main.input-invalid .hide-if-input-invalid {
+      display: none;
+    }
+
+    #grad-bkgd-check:not(:checked)~#skip-test-check-wrapper {
       display: none;
     }
 
@@ -474,6 +490,12 @@
         <div class="hide-if-rhyme-group"><input type="checkbox" id="show-tf-check" onclick="gen();"><label
             for="show-tf-check">韻離合指數後添加「T、F」（兩韻通、兩韻分）</label>
         </div>
+        <div><input type="checkbox" id="grad-bkgd-check" onclick="gen();"><label
+            for="grad-bkgd-check">背景使用漸變顏色</label><span id="skip-test-check-wrapper" class="hide-if-rhyme-group"
+            style="margin-left: 1em;"><input type="checkbox" id="skip-test-check" onclick="gen();"><label
+              for="skip-test-check">不進行 <i>χ</i>²
+              檢驗</span></span></label>
+        </div>
         <!--
         <div><input type="checkbox" id="combine-check" onclick="gen();"><label for="combine-check">合併押韻次數和離合指數</label>
         </div>
@@ -504,7 +526,8 @@
             </div>
             <table id="table"></table>
           </div>
-          <div class="legend chi2 show-if-table-valid hide-if-rhyme-group" style="align-self: flex-end;">
+          <div class="legend chi2 show-if-table-valid hide-if-rhyme-group hide-if-skip-test"
+            style="align-self: flex-end;">
             <h4><i>χ</i>² 臨界值簡表</h4>
             <p><span class="title"><i>p</i> 值</span><i>χ</i>² 臨界值</p>
             <p><span class="title">0.1</span>4.605</p>
@@ -531,25 +554,35 @@
             </p>
             <p class="hide-if-combine"><span class="title">對角線右上：</span><span class="hide-if-rhyme-group">韻</span><span
                 class="show-if-rhyme-group">轍</span>離合指數 <i>I</i></p>
-            <p class="hide-if-rhyme-group"><span class="title">下標數字：</span><i>χ</i>² 值</p>
+            <p class="hide-if-rhyme-group hide-if-skip-test"><span class="title">下標數字：</span><i>χ</i>² 值</p>
           </div>
           <div class="legend bkgd hide-if-hide-all-bkgd">
             <p class="title"><span class="show-if-tf hide-if-rhyme-group">下標字母、</span>單元格背景<span
                 class="hide-if-rhyme-group">、星號</span>：</p>
             <p><span class="cell-t icon"><span class="show-if-tf hide-if-rhyme-group">T</span></span><span>兩<span
-                  class="hide-if-rhyme-group">韻通（<i>I</i> ≥ 90 或 <i>I</i> ≥ 50 且 <i>χ</i>² &lt; 4.605）</span><span
-                  class="show-if-rhyme-group">轍合（<i>I</i> ≥ 2）</span></span></p>
-            <p><span class="cell-t-star icon"><span class="show-if-tf hide-if-rhyme-group">T</span><span
+                  class="hide-if-rhyme-group">韻通（<i>I</i> ≥ 90<span class="hide-if-grad-bkgd"> 或 <i>I</i> ≥ 50 且
+                    <i>χ</i>² &lt; 4.605</span>）</span><span class="show-if-rhyme-group">轍合（<i>I</i> ≥ 2）</span></span>
+            </p>
+            <p class="hide-if-grad-bkgd"><span class="cell-t-star icon"><span
+                  class="show-if-tf hide-if-rhyme-group">T</span><span
                   class="hide-if-rhyme-group">*</span></span><span>兩<span
-                  class="hide-if-rhyme-group">韻通，但如果標準定得更嚴則不通</span><span class="show-if-rhyme-group">轍近（<i>I</i>
-                  1.5~2）</span></span></p>
-            <p><span class="cell-f-star icon"><span class="show-if-tf hide-if-rhyme-group">F</span><span
+                  class="hide-if-rhyme-group">韻通，但如果標準定得更嚴則不通</span><span class="show-if-rhyme-group">轍近（1.5 ≤ <i>I</i>
+                  &lt; 2）</span></span></p>
+            <p class="hide-if-grad-bkgd"><span class="cell-f-star icon"><span
+                  class="show-if-tf hide-if-rhyme-group">F</span><span
                   class="hide-if-rhyme-group">*</span></span><span>兩<span
-                  class="hide-if-rhyme-group">韻分，但如果標準定得更寬則通</span><span class="show-if-rhyme-group">轍近（<i>I</i>
-                  1~1.5）</span></span></p>
+                  class="hide-if-rhyme-group">韻分，但如果標準定得更寬則通</span><span class="show-if-rhyme-group">轍近（1 ≤ <i>I</i>
+                  &lt; 1.5）</span></span></p>
+            <p class="show-if-grad-bkgd"><span style="display: flex;"><span class="icon"
+                  style="min-width: 1em;margin-top: auto;margin-bottom: auto;">↕</span><span
+                  style="flex-grow: 1;line-height: 1.25;">（<span class="hide-if-rhyme-group">50 ≤ <i>I</i> &lt;
+                    90</span><span class="show-if-rhyme-group">1 ≤ <i>I</i> &lt; 2</span> 時按<span
+                    class="hide-if-skip-test"> <i>χ</i>²
+                    在 4.605～10.597 中</span><span class="show-if-skip-test"> <i>I</i> </span>所處位置顯示中間色）</span></span></p>
             <p><span class="cell-f icon"><span class="show-if-tf hide-if-rhyme-group">F</span></span><span>兩<span
-                  class="hide-if-rhyme-group">韻分（<i>I</i> &lt; 50 或 <i>I</i> &lt; 90 且 <i>χ</i>² &gt;
-                  10.597）</span><span class="show-if-rhyme-group">轍遠（<i>I</i> &lt; 1）</span></span></p>
+                  class="hide-if-rhyme-group">韻分（<i>I</i> &lt; 50<span class="hide-if-grad-bkgd"> 或 <i>I</i> &lt; 90 且
+                    <i>χ</i>² &gt; 10.597</span>）</span><span class="show-if-rhyme-group">轍遠（<i>I</i> &lt;
+                  1）</span></span></p>
           </div>
         </div>
       </div>
@@ -568,7 +601,8 @@
           class="show-if-phono-desc">音韻地位</span><span
           class="show-if-pinyin">漢語拼音</span>或韻類）之間可以用空格、製表符或全半角逗號分隔，也可以不分隔，還可以是韻腳字後括注<span
           class="show-if-phono-desc">音韻地位</span><span class="show-if-pinyin">漢語拼音</span>或韻類（<span
-          class="show-if-pinyin">如</span>同<a href="https://nk2028.shn.hk/tshet-uinh-autoderiver/">切韻音系自動推導器</a>匯出的格式）</p>
+          class="show-if-pinyin">如</span>同<a href="https://nk2028.shn.hk/tshet-uinh-autoderiver/">切韻音系自動推導器</a>匯出的格式）
+      </p>
       <p class="indent hide-if-rime-name-only hide-if-rime-count-only">④：<span class="show-if-phono-desc">同<a
             href="https://nk2028.shn.hk/tshet-uinh-autoderiver/">切韻音系自動推導器</a>所用的推導方案代碼格式</span><span
           class="show-if-pinyin">外部傳入的參數爲 <code>漢語拼音</code>，內含 3

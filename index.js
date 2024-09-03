@@ -187,20 +187,23 @@ function gen(reloadData = false, needValidateCountTotal = false, needfixCount = 
   let checkKeys = [
     'phono-desc', 'pinyin', 'rime-name-only', 'rime-count-only',
     'rhyme', 'rhyme-group',
-    'show-tf', 'combine', 'hide-half-bkgd', 'hide-zero', 'hide-all-bkgd',
+    'show-tf', 'grad-bkgd', 'skip-test', 'combine', 'hide-half-bkgd', 'hide-zero', 'hide-all-bkgd',
   ];
   let checks = [];
   let main = document.getElementById('main');
   let output = document.getElementById('output');
+  document.getElementById('grad-bkgd-check').disabled = document.getElementById('hide-all-bkgd-check').checked;
+  document.getElementById('skip-test-check').disabled = document.getElementById('hide-all-bkgd-check').checked;
+  document.getElementById('show-tf-check').disabled = !document.getElementById('grad-bkgd-check').disabled && document.getElementById('grad-bkgd-check').checked;
   main.classList = '';
   checkKeys.forEach(key => {
     let control = document.getElementById(key + '-check');
     if (!control) return;
-    if (control.checked) {
+    if (!control.disabled && control.checked) {
       main.classList.add(key);
     }
     // 轉換爲駝峰式
-    checks[key.replace(/-./g, s => s[1].toUpperCase())] = control.checked;
+    checks[key.replace(/-./g, s => s[1].toUpperCase())] = !control.disabled && control.checked;
   });
 
   if (needValidateCountTotal && checks.rhymeGroup) validateCountTotal();
@@ -306,7 +309,20 @@ function genTable(checks) {
         // 生成下標（檢驗結果）
         if (i !== j) {
           cell.classList.add('cell-' + result[0].toLowerCase() + (result.includes('*') ? '-star' : ''));
-          if (!checks.rhymeGroup) {
+          if (checks.gradBkgd) {
+            let useChi2 = checks.rhyme && !checks.skipTest && chi2TestResult;
+            let lower = useChi2 ? 10.597 : 50;
+            let upper = useChi2 ? 4.605 : 100; // 採用 100 而不是 90 以展示更多顏色
+            let scale = ((useChi2 ? chi2 : idx) - lower) / (upper - lower);
+            scale = scale < 0 ? 0 : scale > 1 ? 1 : scale;
+            let lowerH = useChi2 ? 330 : 360;
+            let upperH = useChi2 ? 210 : 180;
+            let h = scale * (upperH - lowerH) + lowerH;
+            h = Math.round(h);
+            if (h === 360) h = 0;
+            cell.style.background = 'hsl(' + h + 'deg 100% 95%)';
+          }
+          if (!checks.rhymeGroup && !checks.skipTest) {
             let sub = document.createElement('sub');
             if (chi2TestResult) {
               sub.innerText = chi2.toFixed(chi2 > 1 ? 1 : 2);
