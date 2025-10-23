@@ -8,7 +8,7 @@
   <script src="rhyme-stat.js"></script>
   <script src="index.js"></script>
   <script src="pinyin.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tshet-uinh"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tshet-uinh@0.15.1"></script>
   <style>
     body {
       margin: 0;
@@ -277,13 +277,9 @@
     }
 
     .cell-t,
-    #main.combine:not(.grad-bkgd):not(.hide-all-bkgd) .cell-diag,
-    #main:not(.grad-bkgd):not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
+    #main.combine:not(.hide-all-bkgd) .cell-diag,
+    #main:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
       background: #eff;
-    }
-
-    #main.grad-bkgd .cell-diag {
-      background: #e6ffff;
     }
 
     .cell-f,
