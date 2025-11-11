@@ -46,9 +46,9 @@ function getResult(count1, count2, count11, count12, count22) {
   let chi2 = calcChi2(count11, count12, count22);
   let idxResult = '';
   let chi2TestResult = '';
-  if (idx >= 90) {
+  if (idx >= 89.5) {
     idxResult = 'T';
-  } else if (idx < 50) {
+  } else if (idx < 45.5) {
     idxResult = 'F';
   } else {
     if (chi2 < 7.378) {
