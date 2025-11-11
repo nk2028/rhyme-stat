@@ -53,6 +53,15 @@
     #main {
       display: grid;
       grid-auto-flow: dense;
+      --color-t: #eff;
+      --color-f-star: #fcecfc;
+      --color-t-star: #eef;
+      --color-f: #fde9e9;
+    }
+
+    #main.grad-bkgd {
+      --color-t: hsl(180deg 100% 95%);
+      --color-f: hsl(0deg 100% 95%);
     }
 
     #main>div>:first-child,
@@ -279,20 +288,20 @@
     .cell-t,
     #main.combine:not(.hide-all-bkgd) .cell-diag,
     #main:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
-      background: #eff;
+      background: var(--color-t);
     }
 
     .cell-f,
     .cell-nan {
-      background: #fde9e9;
+      background: var(--color-f);
     }
 
     .cell-f-star {
-      background: #fcecfc;
+      background: var(--color-f-star);
     }
 
     .cell-t-star {
-      background: #eef;
+      background: var(--color-t-star);
     }
 
     #main.hide-all-bkgd td {
