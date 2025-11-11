@@ -89,8 +89,8 @@
               檢驗</span></span></label>
         </div>
         <div><input type="checkbox" id="hide-zero-check" onclick="gen();" checked><label for="hide-zero-check">押韻次數爲 0
-            則省略</label>
-        </div>
+            則省略</label></label><input type="checkbox" id="hide-zero-idx-check" style="margin-left: 1em;"
+            onclick="gen();"><label for="hide-zero-idx-check">離合指數爲 0 則省略</label></div>
         <div><input type="checkbox" id="hide-bkgd-check" onclick="gen();"><label for="hide-bkgd-check">隱藏背景顏色</label>
         </div>
         <div><input type="checkbox" id="simplified-check" onclick="gen();"><label
@@ -132,7 +132,8 @@
             <p><span class="title">對角線左下：</span>兩<span class="hide-if-rhyme-group">韻</span><span
                 class="show-if-rhyme-group">轍</span>互押次數<span class="show-if-hide-zero">（爲 0 則省略）</span></p>
             <p><span class="title">對角線右上：</span><span class="hide-if-rhyme-group">韻</span><span
-                class="show-if-rhyme-group">轍</span>離合指數 <i>I</i></p>
+                class="show-if-rhyme-group">轍</span>離合指數 <i>I</i><span class="show-if-hide-zero-idx"> （爲 0 則省略）</span>
+            </p>
             <p class="hide-if-rhyme-group hide-if-skip-test"><span class="title">下標數字：</span><i>χ</i>² 值</p>
           </div>
           <div class="legend bkgd hide-if-hide-bkgd">

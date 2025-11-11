@@ -187,7 +187,7 @@ function gen(reloadData = false, needValidateCountTotal = false, needfixCount = 
   let checkKeys = [
     'phono-desc', 'pinyin', 'rime-name-only', 'rime-count-only',
     'rhyme', 'rhyme-group',
-    'show-tf', 'grad-bkgd', 'skip-test', 'hide-zero', 'hide-bkgd',
+    'show-tf', 'grad-bkgd', 'skip-test', 'hide-zero', 'hide-zero-idx', 'hide-bkgd',
   ];
   let checks = [];
   let main = document.getElementById('main');
@@ -195,6 +195,7 @@ function gen(reloadData = false, needValidateCountTotal = false, needfixCount = 
   document.getElementById('grad-bkgd-check').disabled = document.getElementById('hide-bkgd-check').checked;
   document.getElementById('skip-test-check').disabled = document.getElementById('hide-bkgd-check').checked || !document.getElementById('grad-bkgd-check').checked;
   document.getElementById('show-tf-check').disabled = !document.getElementById('grad-bkgd-check').disabled && document.getElementById('grad-bkgd-check').checked;
+  document.getElementById('hide-zero-idx-check').disabled = !document.getElementById('hide-zero-check').checked || document.getElementById('show-tf-check').checked;
   main.classList = '';
   checkKeys.forEach(key => {
     let control = document.getElementById(key + '-check');
@@ -288,18 +289,23 @@ function genTable(checks) {
         getResult(count1, count2, count11, count12, count22);
       let result = idxResult || chi2TestResult;
 
-      if (count12 === 0 && checks.hideZero) {
-        count12 = '';
-      }
       // 下面先按離合指數生成單元格
       if (isNaN(idx) || idx == Infinity) {
         cell = getCellValue('/');
         cell.classList.add('cell-nan');
       } else {
-        cell = getCellValue(i === j ? '/' : idx.toFixed(
-          !checks.rhymeGroup || idx.toFixed(2) <= 0 ? 0 :
-            idx.toFixed(2) >= 10 ? 1 : 2)
-        );
+        let idxToDisplay = idx.toFixed();
+        if (checks.rhymeGroup) {
+          if (idx.toFixed(2) >= 10) {
+            idxToDisplay = idx.toFixed(1);
+          } else if (idx.toFixed(2) > 0) {
+            idxToDisplay = idx.toFixed(2);
+          }
+        }
+        if (idxToDisplay === '0' && checks.hideZeroIdx) {
+          idxToDisplay = '';
+        }
+        cell = getCellValue(idxToDisplay);
         // 生成下標（檢驗結果）
         if (i !== j) {
           cell.classList.add('cell-' + result[0].toLowerCase() + (result.includes('*') ? '-star' : ''));
@@ -335,6 +341,9 @@ function genTable(checks) {
       }
       // 重新按押韻次數生成單元格內容
       if (i >= j) {
+        if (count12 === 0 && checks.hideZero) {
+          count12 = '';
+        }
         cell.innerHTML = getCellValue(count12).innerHTML;
       }
       if (i === j) {

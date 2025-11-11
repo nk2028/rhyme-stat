@@ -369,6 +369,7 @@ h4 {
 #main.skip-test .hide-if-skip-test,
 #main:not(.skip-test) .show-if-skip-test,
 #main:not(.hide-zero) .show-if-hide-zero,
+#main:not(.hide-zero-idx) .show-if-hide-zero-idx,
 #main.hide-bkgd .hide-if-hide-bkgd,
 #main:not(.has-unannotated) .show-if-has-unannotated,
 #main:not(.table-valid) .show-if-table-valid,
