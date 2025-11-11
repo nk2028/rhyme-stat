@@ -239,7 +239,7 @@ td sub {
 
 th:nth-of-type(3),
 td:nth-of-type(3),
-#main:not(.combine) td.cell-diag + td,
+td.cell-diag + td,
 th.dummy.add-border + th,
 td.dummy.add-border + td {
   border-left-width: 1px;
@@ -253,7 +253,7 @@ td.dummy.double-border + td {
 }
 
 tr:nth-of-type(2) td,
-#main:not(.combine) :not(.dummy) + td.cell-diag,
+:not(.dummy) + td.cell-diag,
 tr.dummy.add-border + tr td {
   border-top-width: 1px;
   padding-top: 8px;
@@ -274,8 +274,7 @@ tr.dummy.gray-border + tr td:not(.cell-diag) {
 }
 
 .cell-t,
-#main.combine:not(.hide-all-bkgd) .cell-diag,
-#main:not(.hide-half-bkgd):not(.hide-all-bkgd) .cell-diag {
+#main:not(.hide-bkgd) .cell-diag {
   background: var(--color-t);
 }
 
@@ -292,7 +291,7 @@ tr.dummy.gray-border + tr td:not(.cell-diag) {
   background: var(--color-t-star);
 }
 
-#main.hide-all-bkgd td {
+#main.hide-bkgd td {
   background: none;
 }
 
@@ -363,16 +362,14 @@ h4 {
 #main:not(.rime-count-only) .show-if-rime-count-only,
 #main.rhyme-group .hide-if-rhyme-group,
 #main:not(.rhyme-group) .show-if-rhyme-group,
-#main.combine .hide-if-combine,
-#main:not(.combine) .show-if-combine,
 #main.show-tf .hide-if-tf,
 #main:not(.show-tf) .show-if-tf,
 #main.grad-bkgd .hide-if-grad-bkgd,
 #main:not(.grad-bkgd) .show-if-grad-bkgd,
 #main.skip-test .hide-if-skip-test,
 #main:not(.skip-test) .show-if-skip-test,
-#main:not(.hide-zero):not(.combine) .show-if-hide-zero-or-combine,
-#main.hide-all-bkgd .hide-if-hide-all-bkgd,
+#main:not(.hide-zero) .show-if-hide-zero,
+#main.hide-bkgd .hide-if-hide-bkgd,
 #main:not(.has-unannotated) .show-if-has-unannotated,
 #main:not(.table-valid) .show-if-table-valid,
 #main.input-invalid .hide-if-input-invalid {

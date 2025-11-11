@@ -187,13 +187,13 @@ function gen(reloadData = false, needValidateCountTotal = false, needfixCount = 
   let checkKeys = [
     'phono-desc', 'pinyin', 'rime-name-only', 'rime-count-only',
     'rhyme', 'rhyme-group',
-    'show-tf', 'grad-bkgd', 'skip-test', 'combine', 'hide-half-bkgd', 'hide-zero', 'hide-all-bkgd',
+    'show-tf', 'grad-bkgd', 'skip-test', 'hide-zero', 'hide-bkgd',
   ];
   let checks = [];
   let main = document.getElementById('main');
   let output = document.getElementById('output');
-  document.getElementById('grad-bkgd-check').disabled = document.getElementById('hide-all-bkgd-check').checked;
-  document.getElementById('skip-test-check').disabled = document.getElementById('hide-all-bkgd-check').checked || !document.getElementById('grad-bkgd-check').checked;
+  document.getElementById('grad-bkgd-check').disabled = document.getElementById('hide-bkgd-check').checked;
+  document.getElementById('skip-test-check').disabled = document.getElementById('hide-bkgd-check').checked || !document.getElementById('grad-bkgd-check').checked;
   document.getElementById('show-tf-check').disabled = !document.getElementById('grad-bkgd-check').disabled && document.getElementById('grad-bkgd-check').checked;
   main.classList = '';
   checkKeys.forEach(key => {
@@ -288,10 +288,10 @@ function genTable(checks) {
         getResult(count1, count2, count11, count12, count22);
       let result = idxResult || chi2TestResult;
 
-      if (count12 === 0 && (checks.combine || checks.hideZero)) {
+      if (count12 === 0 && checks.hideZero) {
         count12 = '';
       }
-      // 下面先按合併押韻次數和離合指數生成單元格
+      // 下面先按離合指數生成單元格
       if (isNaN(idx) || idx == Infinity) {
         cell = getCellValue('/');
         cell.classList.add('cell-nan');
@@ -300,12 +300,6 @@ function genTable(checks) {
           !checks.rhymeGroup || idx.toFixed(2) <= 0 ? 0 :
             idx.toFixed(2) >= 10 ? 1 : 2)
         );
-        // 生成上標（韻次）
-        if (checks.combine && count12 !== '') {
-          let sup = document.createElement('sup');
-          sup.innerText = count12;
-          cell.appendChild(sup);
-        }
         // 生成下標（檢驗結果）
         if (i !== j) {
           cell.classList.add('cell-' + result[0].toLowerCase() + (result.includes('*') ? '-star' : ''));
@@ -339,11 +333,8 @@ function genTable(checks) {
           }
         }
       }
-      // 不合併押韻次數和離合指數時，重新生成單元格
-      if (!checks.combine && i >= j) {
-        if (checks.hideHalfBkgd) {
-          cell.classList = '';
-        }
+      // 重新按押韻次數生成單元格內容
+      if (i >= j) {
         cell.innerHTML = getCellValue(count12).innerHTML;
       }
       if (i === j) {
